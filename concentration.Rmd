@@ -3,7 +3,9 @@ title: "Project 1: Concentration risk tool"
 output:
   html_document:
     toc: true
-    toc_float: true
+    toc_float:
+      collapsed: false
+    number_sections: true
 ---
 
 This section describes the concentration risk tool.. 
@@ -20,6 +22,14 @@ The solution is given by..
 ### Conclusion
 
 The conclusion is...
+
+# Section 2
+
+Section 2 is about..
+
+## Analyses
+
+In this analyses..
 
 
 ```{r}

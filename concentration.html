@@ -146,7 +146,7 @@ $(document).ready(function ()  {
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
     };
-    options.showAndHide = true;
+    options.showAndHide = false;
     options.smoothScroll = true;
 
     // tocify
@@ -209,6 +209,12 @@ div.tocify {
   border-radius: 0px;
 }
 
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
 
 </style>
 
@@ -271,19 +277,27 @@ div.tocify {
 
 <p>This section describes the concentration risk tool..</p>
 <div id="problem" class="section level1">
-<h1>Problem</h1>
+<h1><span class="header-section-number">1</span> Problem</h1>
 <p>The concentration risk tool below..</p>
 <div id="solution" class="section level2">
-<h2>Solution</h2>
+<h2><span class="header-section-number">1.1</span> Solution</h2>
 <p>The solution is given by..</p>
 <div id="conclusion" class="section level3">
-<h3>Conclusion</h3>
+<h3><span class="header-section-number">1.1.1</span> Conclusion</h3>
 <p>The conclusion is…</p>
+</div>
+</div>
+</div>
+<div id="section-2" class="section level1">
+<h1><span class="header-section-number">2</span> Section 2</h1>
+<p>Section 2 is about..</p>
+<div id="analyses" class="section level2">
+<h2><span class="header-section-number">2.1</span> Analyses</h2>
+<p>In this analyses..</p>
 <pre class="r"><code>library(ggplot2)
 bp &lt;- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplot()
 bp</code></pre>
 <p><img src="concentration_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-</div>
 </div>
 </div>
 
