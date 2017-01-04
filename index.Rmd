@@ -8,6 +8,6 @@ Previously, I studied Econometrics at the University of Groningen, where I recei
 
 I live in Haarlem, and I like programming in R. 
 
-This portfolio describes two projects I worked on. The first project is a project I worked on at the risk department of a large Dutch insurance company. The second project below was part of my Master's thesis.
+This portfolio describes two projects I worked on. The first project is a project I did for the risk department of a large Dutch insurance company. The second project below was part of my Master's thesis.
 
 
