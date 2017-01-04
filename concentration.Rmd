@@ -1,0 +1,26 @@
+---
+title: "Project 1: Concentration risk tool"
+---
+
+This section describes the concentration risk tool.. 
+
+# Problem
+
+The concentration risk tool below..
+
+## Solution
+
+The solution is given by..
+
+
+### Conclusion
+
+The conclusion is...
+
+
+```{r}
+library(ggplot2)
+bp <- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplot()
+bp
+```
+
