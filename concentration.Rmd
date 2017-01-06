@@ -5,7 +5,7 @@ output:
     toc: true
     toc_float:
       collapsed: false
-    number_sections: true
+    number_sections: false
 ---
 
 This section describes the concentration risk tool.. 
