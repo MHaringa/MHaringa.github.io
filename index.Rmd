@@ -8,9 +8,7 @@ Previously, I studied Econometrics at the University of Groningen, where I recei
 
 This portfolio describes two projects I worked on. The first project is a project I did for the risk department of a large Dutch insurance company. The second project below was part of my Master's thesis.
 
-![](images/lab_datascience.jpg)
-
-
+<center><img src="images/lab_datascience.jpg"></center>
 
 
 
