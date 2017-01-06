@@ -1,7 +1,5 @@
 ---
-title: "Contact"
+title: "Contact me"
 ---
 
-Email:
-
-**mtharinga [at] gmail.com**
+You can email me at: **mtharinga [at] gmail.com**

@@ -11,7 +11,7 @@
 
 
 
-<title>Project 1: Concentration risk tool</title>
+<title>About me</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,9 +19,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
@@ -127,107 +124,6 @@ $(document).ready(function () {
 
 
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = false;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-.tocify-subheader {
-  display: inline;
-}
-.tocify-subheader .tocify-item {
-  font-size: 0.95em;
-}
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 <div id="rStudioHeader" class="alwaysShrunk">
   <div class="innards bandContent">
@@ -271,36 +167,16 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Project 1: Concentration risk tool</h1>
+<h1 class="title toc-ignore">About me</h1>
 
 </div>
 
 
-<p>This section describes the concentration risk tool..</p>
-<div id="problem" class="section level1">
-<h1><span class="header-section-number">1</span> Problem</h1>
-<p>The concentration risk tool below..</p>
-<div id="solution" class="section level2">
-<h2><span class="header-section-number">1.1</span> Solution</h2>
-<p>The solution is given by..</p>
-<div id="conclusion" class="section level3">
-<h3><span class="header-section-number">1.1.1</span> Conclusion</h3>
-<p>The conclusion is…</p>
-</div>
-</div>
-</div>
-<div id="section-2" class="section level1">
-<h1><span class="header-section-number">2</span> Section 2</h1>
-<p>Section 2 is about..</p>
-<div id="analyses" class="section level2">
-<h2><span class="header-section-number">2.1</span> Analyses</h2>
-<p>In this analyses..</p>
-<pre class="r"><code>library(ggplot2)
-bp &lt;- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplot()
-bp</code></pre>
-<p><img src="concentration_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-</div>
-</div>
+<p>I am an insurance risk trainee at Delta Lloyd. I have a passion for data visualization and sharing my knowledge on Quora, where I write answers to help people interested in Data Science, Probability, Statistics, and more.</p>
+<p>Previously, I studied Econometrics at the University of Groningen, where I received my Bachelor’s Degree. At the University of Amsterdam I received my Master’s degree in Actuarial Science and Mathematical Finance.</p>
+<center>
+<img src="images/lab_datascience.jpg" height="500" width="950">
+</center>
 
 </div> <!-- articleBandContent -->
 </div> <!-- pageContent -->
@@ -319,8 +195,6 @@ bp</code></pre>
 <script type="text/javascript" src="//cdn.bizible.com/scripts/bizible.js" async=""></script>
 
 
-</div>
-</div>
 
 </div>
 
