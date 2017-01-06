@@ -763,7 +763,7 @@ table.table td a:only-child:active {
     max-width: 120%;
     bottom: auto;
     left: auto;
-    top: -50px;
+    top: 50px;
   }
 
   .band .imageTwo {
