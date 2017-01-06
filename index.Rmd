@@ -1,10 +1,5 @@
 ---
 title: "Welcome!"
-output:
-  html_document:
-    toc_float: false
-    includes:
-      before_body: [include_header.html, include_header_navpage.html]
 ---
 
 I am an insurance risk trainee at Delta Lloyd. I have a passion for data visualization and sharing my knowledge on Quora, where I write answers to help people interested in Data Science, Probability, Statistics, and more.
