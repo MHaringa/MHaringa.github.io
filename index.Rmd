@@ -1,10 +1,37 @@
 ---
 title: "Welcome!"
+output:
+  html_document:
+    toc_float: false
+    includes:
+      before_body: [include_header.html, include_header_navpage.html]
 ---
 
-#### This portfolio describes two projects I worked on. The first project is a project I did for the risk department of a large Dutch insurance company. The second project was part of my Master's thesis.
 
-<center><img src="images/lab_datascience.jpg" height="500" width="950"></center>
+```{js}
+$("#rStudioHeader").removeClass("alwaysShrunk");
+$("#pageContent").removeClass("standardPadding");
+```
+
+
+<!--html_preserve-->
+
+<div id="homeContent">
+  <div class="band full blue first rightText">
+    <div class="bandContent vCenter">
+      <div class="blurb">
+        <div class="tagline">Welcome!</div>
+        <div>This portfolio describes two projects I worked on. The first project is a project I did for the risk department of a large Dutch insurance company. The second project was part of my Master's thesis.</div>
+      </div>
+    </div>
+    <img class="imageOne" src="images/transparantlab.png"/>
+  </div>
+</div>
+
+<!--/html_preserve-->
+
+
+
 
 
 
