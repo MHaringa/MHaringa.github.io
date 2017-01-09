@@ -173,36 +173,13 @@ library(RColorBrewer)
 library(classInt)
 library(ggmap)
 
-#function to create map with categorized legend scale
-#scale_fill_distiller(palette = "RdYlGn") works easier: no need for cut continuous into categorical values
-RedYellowGreen <- rev(brewer.pal(5, 'RdYlGn'))
 RedYellowGreen7 <- rev(brewer.pal(7, 'RdYlGn'))
-RedYellowGreen1 <- brewer.pal(5, 'RdYlGn')[3:5]
-Blues5 <- brewer.pal(5, 'Blues')
 Blues7 <- brewer.pal(7, 'Blues')
-Greens <- brewer.pal(5, 'Greens')
-Reds <- brewer.pal(5, 'Reds')
 
 #fisher jenks breaks function
-fisher <- function(data){
-  classIntervals(data, n=5, style='fisher', intervalClosure='right')[[2]]
-}
-
 fisher7 <- function(data){
   classIntervals(data, n=7, style='fisher', intervalClosure='right')[[2]]
 }
-
-# Create a transparent theme object
-transparent_theme <- theme(
-  axis.title.x = element_blank(),
-  axis.title.y = element_blank(),
-  axis.text.x = element_blank(), 
-  axis.text.y = element_blank(),
-  axis.ticks = element_blank(),
-  panel.grid = element_blank(),
-  axis.line = element_blank(),
-  panel.background = element_rect(fill = "transparent",colour = NA),
-  plot.background = element_rect(fill = "transparent",colour = NA))
 
 #transparent legend
 transparent_legend =  theme(
@@ -230,8 +207,8 @@ finaldata <- finaldata00 %>% left_join(., belgieDat) %>% arrange(ID_4)
 #add both vectors to the original data set 
 finaldata0 <- finaldata %>% 
   mutate(RATIO.NCLAIMS.EXP.cut = cut(RATIO.NCLAIMS.EXP, breaks = fisher7(RATIO.NCLAIMS.EXP), include.lowest = TRUE)) %>% 
-  mutate(NCLAIMS.cut = cut(NCLAIMS, breaks = fisher(NCLAIMS), include.lowest = TRUE)) %>%
-  mutate(EXP.cut = cut(EXP, breaks = fisher(EXP), include.lowest = TRUE, dig.lab = 4)) 
+  mutate(NCLAIMS.cut = cut(NCLAIMS, breaks = fisher7(NCLAIMS), include.lowest = TRUE)) %>%
+  mutate(EXP.cut = cut(EXP, breaks = fisher7(EXP), include.lowest = TRUE, dig.lab = 4)) 
 
 #merge this with shapefile to plot the map
 belgie_fortify0 <- left_join(belgie_fortify, finaldata0)
