@@ -43,7 +43,7 @@ library(plotly)
 library(ggplot2) 
 library(dplyr) 
 
-p <- ggplot(iris, aes(Sepal.Length, Petal.Length, colour=Species)) + geom_point() 
+p <- ggplot(iris, aes(Sepal.Length, Petal.Length, colour=Species)) + geom_point() + theme_bw()
  ggplotly(p) 
 
 library(leaflet) 

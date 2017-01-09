@@ -172,7 +172,87 @@ $(document).ready(function () {
 </div>
 
 
-<p>Master’s thesis</p>
+<p>The project below describes parts of my Master’s thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for the best actuarial thesis in 2016.</p>
+<p>The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997.</p>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p>Reading in the data:</p>
+<pre class="r"><code>library(readr)
+MTPL_Data_1997 &lt;- read_delim(&quot;MTPL_Data_1997.txt&quot;, &quot;\t&quot;,
+                             escape_double = FALSE, 
+                             trim_ws = TRUE)</code></pre>
+<p>The table below shows the covariates available in the MTPL insurance portfolio.</p>
+<pre class="r"><code>knitr::kable(head(MTPL_Data_1997, 6))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">NCLAIMS</th>
+<th align="right">AGEPH</th>
+<th align="right">AGEC</th>
+<th align="right">POWER</th>
+<th align="right">SPORT</th>
+<th align="right">CODPOSS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">50</td>
+<td align="right">12</td>
+<td align="right">77</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">64</td>
+<td align="right">3</td>
+<td align="right">66</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">60</td>
+<td align="right">10</td>
+<td align="right">70</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">77</td>
+<td align="right">15</td>
+<td align="right">57</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">28</td>
+<td align="right">7</td>
+<td align="right">70</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">26</td>
+<td align="right">12</td>
+<td align="right">70</td>
+<td align="right">2</td>
+<td align="right">1000</td>
+</tr>
+</tbody>
+</table>
+<p>Histograms for the variables given above:</p>
+<div class="figure">
+<img src="thesis_files/figure-html/unnamed-chunk-5-1.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-2.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-3.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-4.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-5.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-6.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" /><img src="thesis_files/figure-html/unnamed-chunk-5-7.png" alt="Histograms and Tufte boxplots for the variables in the MTPL data set" width="672" />
+<p class="caption">
+Histograms and Tufte boxplots for the variables in the MTPL data set
+</p>
+</div>
+</div>
 
 </div> <!-- articleBandContent -->
 </div> <!-- pageContent -->
