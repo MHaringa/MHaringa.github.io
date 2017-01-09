@@ -21,7 +21,7 @@ $("#pageContent").removeClass("standardPadding");
     <div class="bandContent vCenter">
       <div class="blurb">
         <div class="tagline">Welcome!</div>
-        <div>This portfolio describes two data-related projects I worked on. The first project is a project I did for the risk department of a large Dutch insurance company. The second project was part of my Master's thesis.</div>
+        <div>This portfolio describes two data-related projects I worked on. The first project is a project I did at the risk department of a large Dutch insurance company. The second project was part of my Master's thesis.</div>
       </div>
     </div>
     <img class="imageOne" src="images/transparantlab.png"/>

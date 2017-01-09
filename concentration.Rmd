@@ -38,3 +38,18 @@ bp <- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplo
 bp
 ```
 
+```{r, warning = FALSE, error = FALSE, message=FALSE } 
+library(plotly) 
+library(ggplot2) 
+library(dplyr) 
+
+p <- ggplot(iris, aes(Sepal.Length, Petal.Length, colour=Species)) + geom_point() 
+ ggplotly(p) 
+
+library(leaflet) 
+
+leaflet() %>% 
+  addTiles %>% # Add default OpenStreetMap map tiles 
+  setView(lng = 5.0, lat = 51.0, zoom = 6) 
+
+``` 

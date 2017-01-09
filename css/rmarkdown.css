@@ -760,7 +760,7 @@ table.table td a:only-child:active {
 
   .band .imageOne {
     position: relative;
-    max-width: 120%;
+    max-width: 100%;
     bottom: auto;
     left: auto;
     top: -50px;
