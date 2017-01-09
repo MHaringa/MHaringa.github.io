@@ -1,14 +1,20 @@
 ---
 title: "Project 2: Master's thesis"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
 ---
 
 The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for the best actuarial thesis in 2016. 
 
-The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty 
-liability (MTPL hereafter) insurance portfolio. All the observations 
-relate to the year 1997. 
+# Exploratory data analysis
 
-# Data
+## Data on the Policyholder Level
+
+The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997. 
 
 Reading in the data:
 
@@ -32,6 +38,8 @@ The table below shows the covariates available in the MTPL insurance portfolio.
 ```{r, warning = FALSE, fig.margin = TRUE}
 knitr::kable(head(MTPL_Data_1997, 8))
 ```
+
+
 
 Create histograms for the variables given above:
 
@@ -57,6 +65,9 @@ POWER_hist <- ggplot(data = MTPL_Data_1997, aes(x = POWER)) + theme_bw() +
   scale_x_continuous(breaks = extended_range_breaks()(MTPL_Data_1997$AGEPH)) +
   ylab("Density") + xlab("Power vehicle (kW)")
 ```
+
+
+
 Plot interactive histograms:
 
 ```{r, fig.height=3.5, fig.width=11, warning = FALSE, message=FALSE}
@@ -66,97 +77,7 @@ ggplotly(AGEC_hist)
 ggplotly(POWER_hist)
 ```
 
-
-```{r, eval = FALSE, echo = FALSE, warning = FALSE, message = FALSE}
-library(dplyr)
-belgieDat <- readRDS("belgieDat.rds")
-+ 
-        geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
-        theme_bw() + 
-        xlab(xas) + 
-        ylab("Density") + 
-        coord_cartesian() +
-        geom_vline(mapmean, color = "grey50", linetype = 2) +
-        scale_y_continuous(labels = function(x) format(x, nsmall = 3))
-inwoners <- readRDS("inwoners.rds") #read: niscode, gemeente, totaalbevolking, dichtheidperkm2, oppervlaktekm2
-inkomen <- readRDS("inkomen.rds") #read: niscode, mediaaninkomen1000
-data1997 <- readRDS("data1997.rds") #read: codposs, town, nclaims, amount, period, fuel
-zipcodes <- readRDS("zipcodes.rds") %>% #read: niscode, codposs
-  arrange(NISCODE) 
-verkeer <- readRDS("verkeer.rds") #read: niscode, lengtekm, miljoenvoertuigkm
-
-finaldata00 <- readRDS("finaldata.rds") #combination of data frames: inwoners, inkomen, data1997, zipcodes and verkeer
-data1997a <- finaldata00 %>% 
-  distinct(CODPOSS) %>% 
-  left_join(., finaldata00) %>% 
-  dplyr::select(CODPOSS, MEDIAANINKOMEN1000, ROAD.DENSITY, TRAFFIC.DENSITY.ST)
-
-finaldata <- finaldata00 %>% 
-  left_join(., belgieDat) %>% 
-  arrange(ID_4) 
-
-library(ggplot2)
-library(ggthemes)
-transparent_theme <- theme(
-  axis.title.x = element_blank(),
-  axis.title.y = element_blank(),
-  axis.text.x = element_blank(), 
-  axis.text.y = element_blank(),
-  axis.ticks = element_blank(),
-  panel.grid = element_blank(),
-  axis.line = element_blank(),
-  panel.background = element_rect(fill = "transparent",colour = NA),
-  plot.background = element_rect(fill = "transparent",colour = NA))
-
-histboxplot <- function(mappinghist, xas, mapmean, data, mappingbox, xmin1, xmax1, width1, variable1, bins1){
-  p1 <- ggplot(data = data, mappinghist) + 
-        geom_histogram(aes(y = ..density..), bins = bins1, fill = "grey") + 
-        geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
-        theme_bw() + 
-        xlab(xas) + 
-        ylab("Density") + 
-        coord_cartesian() +
-        geom_vline(mapmean, color = "grey50", linetype = 2) +
-        scale_y_continuous(labels = function(x) format(x, nsmall = 3))
-  p2 <- ggplot(data, mappingbox) + geom_tufteboxplot(colour = "steelblue", whisker.type = "line", median.type = "line", hoffset = 0, width = 5) + 
-    coord_flip() + transparent_theme
-  p2_grob <- ggplotGrob(p2)
-  p1 + annotation_custom(grob = p2_grob, xmin = xmin1, xmax = xmax1, ymin = -width1, ymax = width1) + 
-    scale_x_continuous(breaks = extended_range_breaks()(variable1))
-}
-
-histbox.claims <- histboxplot(aes(x = NCLAIMS), "Number of claims", aes(xintercept = mean(NCLAIMS)), finaldata, 
-                              aes(y = NCLAIMS, x = factor(1)), min(finaldata$NCLAIMS), max(finaldata$NCLAIMS), 0.1, finaldata$NCLAIMS, 80) 
-
-```
-
-```{r, fig.show = 'hold', fig.height = rep(2,7), fig.cap="Histograms and Tufte boxplots for the variables in the MTPL data set", echo = FALSE, eval = FALSE}
-histbox.claims <- histboxplot(aes(x = NCLAIMS), "Number of claims", aes(xintercept = mean(NCLAIMS)), finaldata, 
-                              aes(y = NCLAIMS, x = factor(1)), min(finaldata$NCLAIMS), max(finaldata$NCLAIMS), 0.1, finaldata$NCLAIMS, 80) 
-histbox.power <- histboxplot(aes(x = POWER), "Power vehicle (kW)", aes(xintercept = mean(POWER)), data1997, 
-                             aes(y = POWER, x = factor(1)), min(data1997$POWER), max(data1997$POWER), 0.1, data1997$POWER, 70) 
-histbox.ageph <- histboxplot(aes(x = AGEPH), "Age policyholder (years)", aes(xintercept = mean(AGEPH)), data1997, 
-                             aes(y = AGEPH, x = factor(1)), min(data1997$AGEPH), max(data1997$AGEPH), 0.1, data1997$AGEPH, 79) 
-histbox.agec <- histboxplot(aes(x = AGEC), "Age vehicle (years)", aes(xintercept = mean(AGEC)), data1997, 
-                            aes(y = AGEC, x = factor(1)), min(data1997$AGEC), max(data1997$AGEC), 0.1, data1997$AGEC, 50) 
-histbox.income <- histboxplot(aes(x = MEDIAANINKOMEN1000), "Median income (1000s euros)", aes(xintercept = mean(MEDIAANINKOMEN1000)), finaldata, 
-                              aes(y = MEDIAANINKOMEN1000, x = factor(1)), min(finaldata$MEDIAANINKOMEN1000), max(finaldata$MEDIAANINKOMEN1000), 0.1, round(finaldata$MEDIAANINKOMEN1000,0), 50) 
-histbox.density <- histboxplot(aes(x = ROAD.DENSITY), "Road density (road length in kilometers/area size in square kilometers)", aes(xintercept = mean(ROAD.DENSITY)), finaldata, 
-                               aes(y = ROAD.DENSITY, x = factor(1)), min(finaldata$ROAD.DENSITY), max(finaldata$ROAD.DENSITY), 0.1, round(finaldata$ROAD.DENSITY, 0), 50) 
-histbox.vehicles <- histboxplot(aes(x = MILJVOERTUIGKM), "Traffic density (number of vehicles/road length in kilometers)", aes(xintercept = mean(MILJVOERTUIGKM)), finaldata, 
-                                aes(y = MILJVOERTUIGKM, x = factor(1)), min(finaldata$MILJVOERTUIGKM), max(finaldata$MILJVOERTUIGKM), 0.1, round(finaldata$MILJVOERTUIGKM, 0), 50)
-
-histbox.claims
-histbox.power
-histbox.ageph
-histbox.agec
-histbox.income
-histbox.density
-histbox.vehicles
-
-```
-
-The next step is to explorate the number of claims per municipality. 
+The next step is to explorate the number of claims per municipality. To obtain better insights in the overall geographic patterns of the claim frequency in Belgium, choropleth maps are used. A choropleth map is a thematic map in which areas are shaded or patterned in proportion to the measurements of the statistical variable being displayed on the map. It is observed that in the Brussels-Capital Region many municipalities exist with higher ratios compared to the nation-wide average.
 
 ```{r}
 nclaims_per_codposs <- MTPL_Data_1997 %>%
@@ -165,8 +86,9 @@ nclaims_per_codposs <- MTPL_Data_1997 %>%
   mutate(CLAIM_RATIO = round(NCLAIMS / EXP, 3))
 
 knitr::kable(head(nclaims_per_codposs, 6))
+#stop
 ```
-To gain more insight in the pattern:
+The spatial object on the municipality level is obtained from the Global Administrative Areas (GADM) database (http://www.gadm.org).
 
 ```{r, message = FALSE, error = FALSE, warning = FALSE}
 library(RColorBrewer)
