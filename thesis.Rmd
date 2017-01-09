@@ -22,7 +22,8 @@ Reading in the data:
 library(readr)
 MTPL_Data_1997 <- read_delim("MTPL_Data_1997.txt", "\t",
                              escape_double = FALSE, 
-                             trim_ws = TRUE)
+                             trim_ws = TRUE, 
+                             progress = FALSE)
 ```
 
 ```{r, echo = FALSE, warning = FALSE, message=FALSE}
