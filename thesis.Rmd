@@ -83,8 +83,8 @@ The next step is to explorate the number of claims per municipality. To obtain b
 ```{r}
 nclaims_per_codposs <- MTPL_Data_1997 %>%
   group_by(CODPOSS) %>%
-  summarize(NCLAIMS = sum(NCLAIMS), EXP = n()) %>%
-  mutate(CLAIM_RATIO = round(NCLAIMS / EXP, 3))
+  summarize(NCLAIMS = sum(NCLAIMS), EXPOSURE = n()) %>%
+  mutate(CLAIM_RATIO = round(NCLAIMS / EXPOSURE, 3))
 
 knitr::kable(head(nclaims_per_codposs, 6))
 #stop
