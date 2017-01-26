@@ -12,7 +12,9 @@ This section describes the concentration risk tool..
 
 # Problem
 
-The concentration risk tool below..
+Depending on the available information and the desired format, the cumulation risk given an address or a given location is showed on a map or in a table. Next to this a list with the coördinates with the highest cumulation risks within the Netherlands is given. 
+
+The goal of the tool is to determine the locations with the highest cumulation risks (small-areas with a radius of 200 meters). Furthermore, the tool gives Delta Lloyd acceptants during the accepting process in a fast and simple way insight in the cumulation risk on addresses and locations in the Netherlands. 
 
 ## Solution
 

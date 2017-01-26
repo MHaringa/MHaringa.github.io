@@ -1,0 +1,11 @@
+---
+title: "Blog"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+---
+
+This section describes the concentration risk tool.. 
