@@ -10,7 +10,22 @@ output:
 
 The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for the best actuarial thesis in 2016. 
 
+# Introduction
+
+If you want to learn practical data science (as opposed to theoretical, academic topics) you need to be able to absolutely shred a dataset. 
+
+What that means is that you need to be able to take a dataset, wrangle it into shape, and use visualization and other techniques to find insights. Therefore it is essential to obtain a solid foundation in two core skill areas:
+
+- Data manipulation;
+- Data visualization.
+
+Once you learn these skills *independently*, you can use them *together* for analysis.
+
+In practical terms, this means that as an R user, you should know *ggplot2* and *dplyr* at a minimum. I also recommend learning a few other parts of the tidyverse, like *tidyr*, and *lubridate*.
+
 # Exploratory data analysis
+
+The exploratory data analysis shows how these two core skills are applied to a large motor insurance portfolio from a Belgian non-life insurer. 
 
 ## Data on the Policyholder Level
 
