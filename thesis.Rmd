@@ -23,36 +23,66 @@ Once you learn these skills *independently*, you can use them *together* for ana
 
 In practical terms, this means that as an R user, you should know *ggplot2* and *dplyr* at a minimum. I also recommend learning a few other parts of the tidyverse, like *tidyr*, and *lubridate*.
 
+Let's dive in. I want you to see just how powerful the tidyverse is for wrangling, visualizing, and analyzing data. 
+
+Firt things first: we need to get the data and hammer it into shape. 
+
 # Exploratory data analysis
 
 The exploratory data analysis shows how these two core skills are applied to a large motor insurance portfolio from a Belgian non-life insurer. 
 
 ## Data on the Policyholder Level
 
-The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997. 
-
-Reading in the data:
+First, we need to get the data. Import it using the readr package:
 
 ```{r, warning = FALSE, error=FALSE, message=FALSE}
 library(readr)
-MTPL_Data_1997 <- read_delim("MTPL_Data_1997.txt", "\t",
+mtpl_data_1997 <- read_delim("mtpl_data_1997.txt", "\t",
                              escape_double = FALSE, 
                              trim_ws = TRUE, 
                              progress = FALSE)
 ```
 
+The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997. 
+
 ```{r, echo = FALSE, warning = FALSE, message=FALSE}
 library(dplyr)
-MTPL_Data_1997 <- MTPL_Data_1997 %>%
+mtpl_data_1997 <- mtpl_data_1997 %>%
   select(NCLAIMS, DURATION, AGEPH, AGEC, POWER, SPORT, CODPOSS, TOWN, MAKE) %>%
   mutate(AGEPH = as.numeric(AGEPH))
 ```
 
+After reading in the data, we'll examine the data using glimpse(). 
 
-The table below shows the covariates available in the MTPL insurance portfolio. 
+This will give us the names of the columns, the dimensions of the data, and will print out the first several observations. 
+
+You'll see this sort of data inspection after many of the procedures we execute. It's important to routinely examine your data after you change it. Essentially, as you execute a procedure, you want to make sure that the procedure did what you wanted it to. 
+
+Get into the habit of examining your data after important blocks of data wrangling code. 
 
 ```{r, warning = FALSE, fig.margin = TRUE}
-knitr::kable(head(MTPL_Data_1997, 8))
+# INSPECT 
+glimpse(mtpl_data_1997)
+```
+
+## Rename variables
+
+Next, we're going to rename our variables by transforming them all to lower case. 
+
+In programming, there are several different style conventions, but many people will tell you that there's no good reason to have a capitalized first letter for a variable name. In most situations, you'll want to remove capitals, if for no other reason than it makes them easier to type. 
+
+To execute this, we're going to use colnames() and tolower(). 
+
+On the right-hand side of the expression, colnames() lists the column names and tolower() transforms them to lower case. Here, we're using the pipe operator (%>%) to "pipe" the names into tolower(). 
+
+We then use the assignment operator () so the new lower case names serve as the input of colnames(mtpl_data_1997) on the left-hand side. 
+
+```{r}
+#LOWER CASE
+colnames(mtpl_data_1997) <- colnames(mtpl_data_1997) %>% tolower()
+
+#INSPECT
+colnames(mtpl_data_1997)
 ```
 
 
@@ -63,22 +93,22 @@ Create histograms for the variables given above:
 library(ggplot2)
 library(ggthemes)
 
-AGEPH_hist <- ggplot(data = MTPL_Data_1997, aes(x = AGEPH)) + theme_bw() +
+AGEPH_hist <- ggplot(data = mtpl_data_1997, aes(x = ageph)) + theme_bw() +
   geom_histogram(aes(y = ..density..), bins = 79, fill = "dodgerblue") +
   geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
-  scale_x_continuous(breaks = extended_range_breaks()(MTPL_Data_1997$AGEPH)) +
+  scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$ageph)) +
   ylab("Density") + xlab("Age policyholder (years)")
 
-AGEC_hist <- ggplot(data = MTPL_Data_1997, aes(x = AGEC)) + theme_bw() +
+AGEC_hist <- ggplot(data = mtpl_data_1997, aes(x = agec)) + theme_bw() +
   geom_histogram(aes(y = ..density..), bins = 50, fill = "dodgerblue") +
   geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
-  scale_x_continuous(breaks = extended_range_breaks()(MTPL_Data_1997$AGEC)) +
+  scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$agec)) +
   ylab("Density") + xlab("Age vehicle (years)")
 
-POWER_hist <- ggplot(data = MTPL_Data_1997, aes(x = POWER)) + theme_bw() +
+POWER_hist <- ggplot(data = mtpl_data_1997, aes(x = power)) + theme_bw() +
   geom_histogram(aes(y = ..density..), bins = 70, fill = "dodgerblue") +
   geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
-  scale_x_continuous(breaks = extended_range_breaks()(MTPL_Data_1997$AGEPH)) +
+  scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$ageph)) +
   ylab("Density") + xlab("Power vehicle (kW)")
 ```
 
@@ -96,10 +126,10 @@ ggplotly(POWER_hist)
 The next step is to explorate the number of claims per municipality. To obtain better insights in the overall geographic patterns of the claim frequency in Belgium, choropleth maps are used. A choropleth map is a thematic map in which areas are shaded or patterned in proportion to the measurements of the statistical variable being displayed on the map. It is observed that in the Brussels-Capital Region many municipalities exist with higher ratios compared to the nation-wide average.
 
 ```{r}
-nclaims_per_codposs <- MTPL_Data_1997 %>%
-  group_by(CODPOSS) %>%
-  summarize(NCLAIMS = sum(NCLAIMS), EXPOSURE = n()) %>%
-  mutate(CLAIM_RATIO = round(NCLAIMS / EXPOSURE, 3))
+nclaims_per_codposs <- mtpl_data_1997 %>%
+  group_by(codposs) %>%
+  summarize(nclaims = sum(nclaims), exposure = n()) %>%
+  mutate(claim_ratio = round(nclaims / exposure, 3))
 
 knitr::kable(head(nclaims_per_codposs, 6))
 #stop
@@ -140,19 +170,31 @@ map_belgium_disc <- function(data, mapping, naam, palette) {
 belgie_fortify <- readRDS("belgie_fortify.rds")
 finaldata00 <- readRDS("finaldata.rds") #combination of data frames: inwoners, inkomen, data1997, zipcodes and verkeer
 belgieDat <- readRDS("belgieDat.rds")
-finaldata <- finaldata00 %>% left_join(., belgieDat) %>% arrange(ID_4)
+finaldata <- finaldata00 %>% 
+  left_join(., belgieDat) %>% 
+  arrange(ID_4)
+
+colnames(finaldata) <- colnames(finaldata) %>% tolower()
+
+glimpse(finaldata)
 
 #add both vectors to the original data set 
 finaldata0 <- finaldata %>% 
-  mutate(RATIO.NCLAIMS.EXP.cut = cut(RATIO.NCLAIMS.EXP, breaks = fisher7(RATIO.NCLAIMS.EXP), include.lowest = TRUE)) %>% 
-  mutate(NCLAIMS.cut = cut(NCLAIMS, breaks = fisher7(NCLAIMS), include.lowest = TRUE)) %>%
-  mutate(EXP.cut = cut(EXP, breaks = fisher7(EXP), include.lowest = TRUE, dig.lab = 4)) 
+  mutate(ratio.nclaims.exp.cut = cut(ratio.nclaims.exp, 
+                                     breaks = fisher7(ratio.nclaims.exp), 
+                                     include.lowest = TRUE)) %>% 
+  mutate(nclaims.cut = cut(nclaims, breaks = fisher7(nclaims), include.lowest = TRUE)) %>%
+  mutate(exp.cut = cut(exp, breaks = fisher7(exp), include.lowest = TRUE, dig.lab = 4)) 
+
+colnames(finaldata0) <- colnames(finaldata0) %>% tolower()
+
+colnames(belgie_fortify) <- colnames(belgie_fortify) %>% tolower()
 
 #merge this with shapefile to plot the map
 belgie_fortify0 <- left_join(belgie_fortify, finaldata0)
 
 #plot ratio 
-ratio.map <- map_belgium_disc(belgie_fortify0, aes(fill = RATIO.NCLAIMS.EXP.cut), "Ratio", palette = Blues7)
+ratio.map <- map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut), "Ratio", palette = Blues7)
 ggplotly(ratio.map)
 ```
 
