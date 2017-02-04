@@ -8,16 +8,16 @@ output:
     number_sections: false
 ---
 
-The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for the best actuarial thesis in 2016. 
+The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. 
 
 # Introduction
 
-If you want to learn practical data science (as opposed to theoretical, academic topics) you need to be able to take a dataset, wrangle it into shape, and use visualization and other techniques to find insights. Therefore it is essential to obtain a solid foundation in two core skill areas:
+Learning practical data science (as opposed to theoretical, academic topics) requires the ability to take a dataset, wrangle it into shape, and use visualization techniques to find insights. Therefore it is essential to obtain a solid foundation in two core skill areas:
 
 - Data manipulation;
 - Data visualization.
 
-In practical terms, this means that as an R user, you should know *ggplot2* and *dplyr* at a minimum. Also learning a few other parts of the tidyverse, like *tidyr*, and *lubridate*, is recommended. The tidyverse is a set of packages that work in harmony because they share common data representations. It is powerful for wrangling, visualizing, and analyzing data. 
+In practical terms, this means that as an R user, you should know <tt>ggplot2</tt> and <tt>dplyr</tt>. Also learning a few other parts of the tidyverse, like <tt>tidyr</tt>, and <tt>lubridate</tt>, is recommended. The <tt>tidyverse</tt> is a set of packages that work in harmony because they share common data representations. It is powerful for wrangling, visualizing, and analyzing data. 
 
 This project shows how these two core skills are applied to a large motor insurance portfolio from a Belgian non-life insurer. It contains parts of my master's thesis. 
 
@@ -73,11 +73,9 @@ colnames(mtpl_data_1997)
 To obtain insights in the distribution of the data on the policyholder's level, histograms are created  for the age of the policyholder, age of the vehicle, and power of the vehicle, using the *ggplot2* library in R. 
 
 ```{r, fig.height=3.5, fig.width=11, warning = FALSE, message=FALSE}
-
 # LOAD LIBRARIES
 library(ggplot2)
 library(ggthemes)
-
 
 # CREATE HISTOGRAMS
 ageph_histogram <- ggplot(data = mtpl_data_1997, aes(x = ageph)) + 
@@ -123,6 +121,7 @@ nclaims_per_codposs <- mtpl_data_1997 %>%
   summarize(nclaims = sum(nclaims), exposure = n()) %>%
   mutate(claim_ratio = round(nclaims / exposure, 3))
 
+#INSPECT
 glimpse(nclaims_per_codposs)
 ```
 
@@ -130,33 +129,42 @@ The spatial object on the municipality level is obtained from the Global Adminis
 
 ```{r, message = FALSE, warning = FALSE, eval = FALSE}
 #install.packages("gpclib", type = "source")
-#library(gpclib)
+library(gpclib)
 library(rgeos)
-#gpclibPermit() #turn on the license
-#gpclibPermit()
+gpclibPermit() #turn on the license
 belgium_shapefile <- readRDS("BEL_adm4.rds") #load shapefile
 belgie_fortify0 <- fortify(belgium_shapefile, region = "NAME_4") 
-
-glimpse(belgie_fortify)
 ```
+
+
+Make sure to remove all unwanted characters. 
+
 ```{r, eval = FALSE}
 library(gsubfn)
 
-unwanted_array <- list(    'Š'='S', 'š'='s', 'Ž'='Z', 'ž'='z', 'À'='A', 'Á'='A', 'Â'='A', 'Ã'='A', 'Ä'='A', 'Å'='A', 'Æ'='A', 'Ç'='C', 'È'='E', 'É'='E',
-                           'Ê'='E', 'Ë'='E', 'Ì'='I', 'Í'='I', 'Î'='I', 'Ï'='I', 'Ñ'='N', 'Ò'='O', 'Ó'='O', 'Ô'='O', 'Õ'='O', 'Ö'='O', 'Ø'='O', 'Ù'='U',
-                           'Ú'='U', 'Û'='U', 'Ü'='U', 'Ý'='Y', 'Þ'='B', 'ß'='Ss', 'à'='a', 'á'='a', 'â'='a', 'ã'='a', 'ä'='a', 'å'='a', 'æ'='a', 'ç'='c',
-                           'è'='e', 'é'='e', 'ê'='e', 'ë'='e', 'ì'='i', 'í'='i', 'î'='i', 'ï'='i', 'ð'='o', 'ñ'='n', 'ò'='o', 'ó'='o', 'ô'='o', 'õ'='o',
-                           'ö'='o', 'ø'='o', 'ù'='u', 'ú'='u', 'û'='u', 'ý'='y', 'ý'='y', 'þ'='b', 'ÿ'='y' )
+#LIST OF UNWANTED PUNCTUATION MARKS
+unwanted_array <- list('Š'='S', 'š'='s', 'Ž'='Z', 'ž'='z', 'À'='A', 'Á'='A', 'Â'='A', 
+                       'Ã'='A', 'Ä'='A', 'Å'='A', 'Æ'='A', 'Ç'='C', 'È'='E', 'É'='E',
+                       'Ê'='E', 'Ë'='E', 'Ì'='I', 'Í'='I', 'Î'='I', 'Ï'='I', 'Ñ'='N', 
+                       'Ò'='O', 'Ó'='O', 'Ô'='O', 'Õ'='O', 'Ö'='O', 'Ø'='O', 'Ù'='U',
+                       'Ú'='U', 'Û'='U', 'Ü'='U', 'Ý'='Y', 'Þ'='B', 'ß'='Ss','à'='a', 
+                       'á'='a', 'â'='a', 'ã'='a', 'ä'='a', 'å'='a', 'æ'='a', 'ç'='c',
+                       'è'='e', 'é'='e', 'ê'='e', 'ë'='e', 'ì'='i', 'í'='i', 'î'='i', 
+                       'ï'='i', 'ð'='o', 'ñ'='n', 'ò'='o', 'ó'='o', 'ô'='o', 'õ'='o',
+                       'ö'='o', 'ø'='o', 'ù'='u', 'ú'='u', 'û'='u', 'ý'='y', 'ý'='y', 
+                       'þ'='b', 'ÿ'='y')
 
-#again but now eliminating punctuation marks in municipality names
-belgie_fortify1 <- belgie_fortify %>% 
+#ELIMINATING PUNCTUATION MARKS IN MUNICIPALITY NAMES
+belgie_fortify <- belgie_fortify0 %>% 
   mutate(id = gsubfn(paste(names(unwanted_array), collapse = '|'), unwanted_array, toupper(id))) 
 
-glimpse(belgie_fortify1)
 ```
 
+```{r, eval = TRUE, echo = FALSE, warning = FALSE, message = FALSE}
+belgie_fortify <- readRDS("belgie_fortify.rds")
+```
 
-```{r, message = FALSE, error = FALSE, warning = FALSE, eval = FALSE}
+```{r, message = FALSE, error = FALSE, warning = FALSE, eval = TRUE}
 library(RColorBrewer)
 library(classInt)
 library(ggmap)
@@ -187,7 +195,7 @@ map_belgium_disc <- function(data, mapping, naam, palette) {
     transparent_legend
 }
 
-belgie_fortify <- readRDS("belgie_fortify.rds")
+
 finaldata00 <- readRDS("finaldata.rds") #combination of data frames: inwoners, inkomen, data1997, zipcodes and verkeer
 belgieDat <- readRDS("belgieDat.rds")
 finaldata <- finaldata00 %>% 

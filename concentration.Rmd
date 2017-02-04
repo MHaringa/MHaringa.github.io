@@ -8,46 +8,100 @@ output:
     number_sections: false
 ---
 
-This section describes the concentration risk tool.. 
+# Introduction
+The goal of this project is to determine the coördinates (long/lat) in the Netherlands with the highest concentration risks. Concentration risk is defined as the cumulation of all exposures within a certain radius. 
 
-# Problem
+The algorithm is using an iterative procedure to find the coördinates with the highest concentration risk within a certain area:
 
-Depending on the available information and the desired format, the cumulation risk given an address or a given location is showed on a map or in a table. Next to this a list with the coördinates with the highest cumulation risks within the Netherlands is given. 
+<center><img src="images/Beschrijving_algoritme2.png" height="150" width="300"></center>
 
-The goal of the tool is to determine the locations with the highest cumulation risks (small-areas with a radius of 200 meters). Furthermore, the tool gives Delta Lloyd acceptants during the accepting process in a fast and simple way insight in the cumulation risk on addresses and locations in the Netherlands. 
+## Algorithm 
 
-## Solution
+The solution is given by:
 
-The solution is given by..
+```{r, eval = FALSE}
+library(dplyr)
+library(tidyr)
+library(geosphere)
+library(ggmap)
+library(RColorBrewer)
+library(classInt)
+
+alle.adressen <- readRDS("data/alle_adressen.rds")
+
+#nieuw <- alle.adressen %>% mutate(huisnrtoevoeging = paste0(huisletter, huisnrtoev)) 
+
+alle.adressen.som <- alle.adressen %>% 
+  mutate(som = oppervlakte+1) %>% #maak fictieve verzekerde sommen
+  sample_n(. , 2e6) #maak portfolio van 2 miljoen polissen
+
+expand <- function(west, oost, zuid, noord, breedte.blok){ #functie om raster te maken
+  breedte <- distHaversine(c(west, zuid), c(oost, zuid)) / breedte.blok #breedte.blok in meters
+  hoogte <- distHaversine(c(west, zuid), c(west, noord)) / breedte.blok
+  expand.grid(long = seq(west, oost, length.out = breedte), lat = seq(zuid, noord, length.out = hoogte))
+}
+
+totaal.in.blok <- function(long, lat, breedte.blok){ #functie om totale verzekerde som per blok te bepalen; long/lat is middelpunt van blok
+  
+  blok <-  data.frame(long = long, lat = lat) %>% 
+    mutate(west = destPoint(c(long, lat), 270, breedte.blok/2+200)[[1]]) %>%
+    mutate(oost = destPoint(c(long, lat), 90, breedte.blok/2+200)[[1]]) %>%
+    mutate(zuid = destPoint(c(long, lat), 180, breedte.blok/2+200)[[2]]) %>%
+    mutate(noord = destPoint(c(long, lat), 360, breedte.blok/2+200)[[2]])
+  
+  blok.som <- alle.adressen.som %>% 
+    filter(., longitude > blok$west & longitude < blok$oost) %>% 
+    filter(., latitude > blok$zuid & latitude < blok$noord) %>% 
+    select(som) 
+  if (nrow(blok.som)==0) {0} else as.numeric(sum(blok.som))
+}
+
+iteratie <- function(stap, breedte.blok){
+  result1 <- stap %>% select(long, lat) %>% rowwise() %>% 
+    mutate(west = destPoint(c(long, lat), 270, (breedte.blok/2))[[1]]) %>%
+    mutate(oost = destPoint(c(long, lat), 90, (breedte.blok/2))[[1]]) %>%
+    mutate(zuid = destPoint(c(long, lat), 180, (breedte.blok/2))[[2]]) %>%
+    mutate(noord = destPoint(c(long, lat), 360, (breedte.blok/2))[[2]]) %>%
+    select(-lat, -long)
+  result2 <- apply(result1[,c(1:4)], 1, function(x) expand(x[1], x[2], x[3], x[4], breedte.blok)) %>%
+    data.frame(.) %>% gather(., condition, lat, lat:ncol(.)) %>% select(long, lat)
+  result2 %>% rowwise() %>%
+    mutate(som = totaal.in.blok(long, lat, breedte.blok)) %>% 
+    filter(som > som.grens) #grens boven 10000 euro
+}
 
 
-### Conclusion
+#iteratie: 200m > 400m > 800m > 1600m > 3200m > 6400m > 12800m > 25600m ..........  (> 51200m > 102400m)  
+stap0 <- expand(3.27, 7.23, 50.75, 53.5, 25600) #blokken van 25600 meter 
+stap1 <- stap0 %>% rowwise() %>% mutate(som = totaal.in.blok(long,lat, 25600)) %>% filter(som > 10000) 
+stap2 <- iteratie(stap1, 12800) #blokken van 12800 meter
+stap3 <- iteratie(stap2, 6400) #blokken van 6400 meter
+stap4 <- iteratie(stap3, 3200) #blokken van 3200 meter
+stap5 <- iteratie(stap4, 1600) #blokken van 1600 meter
+stap6 <- iteratie(stap5, 800) #blokken van 800 meter
+stap7 <- iteratie(stap6, 400) #blokken van 400 meter
+stap8 <- iteratie(stap7, 200) #blokken van 200 meter
 
-The conclusion is...
-
-# Section 2
-
-Section 2 is about..
-
-## Analyses
-
-In this analyses..
-
-
-```{r}
-library(ggplot2)
-bp <- ggplot(data=PlantGrowth, aes(x=group, y=weight, fill=group)) + geom_boxplot()
-bp
+coordinaten.boven.grens <- function(som.grens){
+  stap0 <- expand(3.27, 7.23, 50.75, 53.5, 25600) #blokken van 25600 meter 
+  stap1 <- stap0 %>% rowwise() %>% mutate(som = totaal.in.blok(long,lat, 25600)) %>% filter(som > som.grens) 
+  stap2 <- iteratie(stap1, 12800, som.grens) #blokken van 12800 meter
+  stap3 <- iteratie(stap2, 6400, som.grens) #blokken van 6400 meter
+  stap4 <- iteratie(stap3, 3200, som.grens) #blokken van 3200 meter
+  stap5 <- iteratie(stap4, 1600, som.grens) #blokken van 1600 meter
+  stap6 <- iteratie(stap5, 800, som.grens) #blokken van 800 meter
+  stap7 <- iteratie(stap6, 400, som.grens) #blokken van 400 meter
+  stap8 <- iteratie(stap7, 200, som.grens) #blokken van 200 meter 
+  stap9 <- iteratie(stap8, 100, som.grens) #blokken van 100 meter + overlap van 200 meter
+}
 ```
 
-```{r, warning = FALSE, error = FALSE, message=FALSE } 
+
+
+```{r, warning = FALSE, error = FALSE, message=FALSE, echo = FALSE} 
 library(plotly) 
 library(ggplot2) 
 library(dplyr) 
-
-p <- ggplot(iris, aes(Sepal.Length, Petal.Length, colour=Species)) + geom_point() + theme_bw()
- ggplotly(p) 
-
 library(leaflet) 
 
 leaflet() %>% 
