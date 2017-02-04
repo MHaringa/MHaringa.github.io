@@ -12,26 +12,18 @@ The project below describes parts of my Master's thesis to obtain my degree in A
 
 # Introduction
 
-If you want to learn practical data science (as opposed to theoretical, academic topics) you need to be able to absolutely shred a dataset. 
-
-What that means is that you need to be able to take a dataset, wrangle it into shape, and use visualization and other techniques to find insights. Therefore it is essential to obtain a solid foundation in two core skill areas:
+If you want to learn practical data science (as opposed to theoretical, academic topics) you need to be able to take a dataset, wrangle it into shape, and use visualization and other techniques to find insights. Therefore it is essential to obtain a solid foundation in two core skill areas:
 
 - Data manipulation;
 - Data visualization.
 
-Once you learn these skills *independently*, you can use them *together* for analysis.
+In practical terms, this means that as an R user, you should know *ggplot2* and *dplyr* at a minimum. Also learning a few other parts of the tidyverse, like *tidyr*, and *lubridate*, is recommended. The tidyverse is a set of packages that work in harmony because they share common data representations. It is powerful for wrangling, visualizing, and analyzing data. 
 
-In practical terms, this means that as an R user, you should know *ggplot2* and *dplyr* at a minimum. I also recommend learning a few other parts of the tidyverse, like *tidyr*, and *lubridate*.
+This project shows how these two core skills are applied to a large motor insurance portfolio from a Belgian non-life insurer. It contains parts of my master's thesis. 
 
-Let's dive in. I want you to see just how powerful the tidyverse is for wrangling, visualizing, and analyzing data. 
+First things first: we need to get the data and hammer it into shape.
 
-Firt things first: we need to get the data and hammer it into shape. 
-
-# Exploratory data analysis
-
-The exploratory data analysis shows how these two core skills are applied to a large motor insurance portfolio from a Belgian non-life insurer. 
-
-## Data on the Policyholder Level
+# Read the data
 
 First, we need to get the data. Import it using the readr package:
 
@@ -43,8 +35,6 @@ mtpl_data_1997 <- read_delim("mtpl_data_1997.txt", "\t",
                              progress = FALSE)
 ```
 
-The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997. 
-
 ```{r, echo = FALSE, warning = FALSE, message=FALSE}
 library(dplyr)
 mtpl_data_1997 <- mtpl_data_1997 %>%
@@ -54,28 +44,20 @@ mtpl_data_1997 <- mtpl_data_1997 %>%
 
 After reading in the data, we'll examine the data using glimpse(). 
 
-This will give us the names of the columns, the dimensions of the data, and will print out the first several observations. 
-
-You'll see this sort of data inspection after many of the procedures we execute. It's important to routinely examine your data after you change it. Essentially, as you execute a procedure, you want to make sure that the procedure did what you wanted it to. 
-
-Get into the habit of examining your data after important blocks of data wrangling code. 
+This will give us the names of the columns, the dimensions of the data, and will print out the first several observations. It is important to routinely examine your data after you change it. Essentially, as you execute a procedure, you want to make sure that the procedure did what you wanted it to. 
 
 ```{r, warning = FALSE, fig.margin = TRUE}
 # INSPECT 
 glimpse(mtpl_data_1997)
 ```
 
-## Rename variables
+The data set at hand consists of 163,660 records concerning a Belgian motor thirdparty liability (MTPL hereafter) insurance portfolio. All the observations relate to the year 1997. 
 
-Next, we're going to rename our variables by transforming them all to lower case. 
+# Rename variables
 
-In programming, there are several different style conventions, but many people will tell you that there's no good reason to have a capitalized first letter for a variable name. In most situations, you'll want to remove capitals, if for no other reason than it makes them easier to type. 
+Next, we're going to rename our variables by transforming them all to lower case. In programming, there are several different style conventions, but many people will tell you that there's no good reason to have a capitalized first letter for a variable name. In most situations, you'll want to remove capitals, if for no other reason than it makes them easier to type. 
 
-To execute this, we're going to use colnames() and tolower(). 
-
-On the right-hand side of the expression, colnames() lists the column names and tolower() transforms them to lower case. Here, we're using the pipe operator (%>%) to "pipe" the names into tolower(). 
-
-We then use the assignment operator () so the new lower case names serve as the input of colnames(mtpl_data_1997) on the left-hand side. 
+To execute this, we're going to use colnames() and tolower(). Here, we're using the pipe operator (%>%) to 'pipe' the names into tolower(). The pipe operator can be read as 'and then'. 
 
 ```{r}
 #LOWER CASE
@@ -86,57 +68,95 @@ colnames(mtpl_data_1997)
 ```
 
 
+# Create histograms
 
-Create histograms for the variables given above:
+To obtain insights in the distribution of the data on the policyholder's level, histograms are created  for the age of the policyholder, age of the vehicle, and power of the vehicle, using the *ggplot2* library in R. 
 
 ```{r, fig.height=3.5, fig.width=11, warning = FALSE, message=FALSE}
+
+# LOAD LIBRARIES
 library(ggplot2)
 library(ggthemes)
 
-AGEPH_hist <- ggplot(data = mtpl_data_1997, aes(x = ageph)) + theme_bw() +
+
+# CREATE HISTOGRAMS
+ageph_histogram <- ggplot(data = mtpl_data_1997, aes(x = ageph)) + 
   geom_histogram(aes(y = ..density..), bins = 79, fill = "dodgerblue") +
-  geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
   scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$ageph)) +
-  ylab("Density") + xlab("Age policyholder (years)")
+  ylab("Density") + xlab("Age policyholder (years)") + 
+  theme_bw() #theme with a white background
 
-AGEC_hist <- ggplot(data = mtpl_data_1997, aes(x = agec)) + theme_bw() +
+agec_histogram <- ggplot(data = mtpl_data_1997, aes(x = agec)) + 
   geom_histogram(aes(y = ..density..), bins = 50, fill = "dodgerblue") +
-  geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
   scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$agec)) +
-  ylab("Density") + xlab("Age vehicle (years)")
+  ylab("Density") + xlab("Age vehicle (years)") + theme_bw() 
 
-POWER_hist <- ggplot(data = mtpl_data_1997, aes(x = power)) + theme_bw() +
+power_histogram <- ggplot(data = mtpl_data_1997, aes(x = power)) +
   geom_histogram(aes(y = ..density..), bins = 70, fill = "dodgerblue") +
-  geom_line(aes(y=..density..), stat = 'density', colour = "grey50", adjust = 2) +
   scale_x_continuous(breaks = extended_range_breaks()(mtpl_data_1997$ageph)) +
-  ylab("Density") + xlab("Power vehicle (kW)")
+  ylab("Density") + xlab("Power vehicle (kW)") + theme_bw()
 ```
 
-
-
-Plot interactive histograms:
+Use ggplot2 with plotly to obtain interactive ggplot2 charts:
 
 ```{r, fig.height=3.5, fig.width=11, warning = FALSE, message=FALSE}
+# LOAD LIBRARY
 library(plotly)
-ggplotly(AGEPH_hist)
-ggplotly(AGEC_hist)
-ggplotly(POWER_hist)
+
+# CREATE INTERACTIVE GGPLOT2 CHARTS
+ggplotly(ageph_histogram)
+ggplotly(agec_histogram)
+ggplotly(power_histogram)
 ```
 
-The next step is to explorate the number of claims per municipality. To obtain better insights in the overall geographic patterns of the claim frequency in Belgium, choropleth maps are used. A choropleth map is a thematic map in which areas are shaded or patterned in proportion to the measurements of the statistical variable being displayed on the map. It is observed that in the Brussels-Capital Region many municipalities exist with higher ratios compared to the nation-wide average.
+# Choropleth maps
+
+To obtain better insights in the overall geographic patterns of the number of claims per municipality in Belgium, choropleth maps are used. A choropleth map is a thematic map in which areas are shaded or patterned in proportion to the measurements of the statistical variable being displayed on the map. 
 
 ```{r}
+# LOAD LIBRARY
+library(dplyr)
+
+# SUMMARIZE NUMBER OF CLAIMS AND EXPOSURE PER POSTAL CODE
 nclaims_per_codposs <- mtpl_data_1997 %>%
   group_by(codposs) %>%
   summarize(nclaims = sum(nclaims), exposure = n()) %>%
   mutate(claim_ratio = round(nclaims / exposure, 3))
 
-knitr::kable(head(nclaims_per_codposs, 6))
-#stop
+glimpse(nclaims_per_codposs)
 ```
-The spatial object on the municipality level is obtained from the Global Administrative Areas (GADM) database (http://www.gadm.org).
 
-```{r, message = FALSE, error = FALSE, warning = FALSE}
+The spatial object on the municipality level is obtained from the Global Administrative Areas (GADM) database (http://www.gadm.org) in a R (SpatialPolygonsDataFrame) format.
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+#install.packages("gpclib", type = "source")
+#library(gpclib)
+library(rgeos)
+#gpclibPermit() #turn on the license
+#gpclibPermit()
+belgium_shapefile <- readRDS("BEL_adm4.rds") #load shapefile
+belgie_fortify0 <- fortify(belgium_shapefile, region = "NAME_4") 
+
+glimpse(belgie_fortify)
+```
+```{r, eval = FALSE}
+library(gsubfn)
+
+unwanted_array <- list(    'Š'='S', 'š'='s', 'Ž'='Z', 'ž'='z', 'À'='A', 'Á'='A', 'Â'='A', 'Ã'='A', 'Ä'='A', 'Å'='A', 'Æ'='A', 'Ç'='C', 'È'='E', 'É'='E',
+                           'Ê'='E', 'Ë'='E', 'Ì'='I', 'Í'='I', 'Î'='I', 'Ï'='I', 'Ñ'='N', 'Ò'='O', 'Ó'='O', 'Ô'='O', 'Õ'='O', 'Ö'='O', 'Ø'='O', 'Ù'='U',
+                           'Ú'='U', 'Û'='U', 'Ü'='U', 'Ý'='Y', 'Þ'='B', 'ß'='Ss', 'à'='a', 'á'='a', 'â'='a', 'ã'='a', 'ä'='a', 'å'='a', 'æ'='a', 'ç'='c',
+                           'è'='e', 'é'='e', 'ê'='e', 'ë'='e', 'ì'='i', 'í'='i', 'î'='i', 'ï'='i', 'ð'='o', 'ñ'='n', 'ò'='o', 'ó'='o', 'ô'='o', 'õ'='o',
+                           'ö'='o', 'ø'='o', 'ù'='u', 'ú'='u', 'û'='u', 'ý'='y', 'ý'='y', 'þ'='b', 'ÿ'='y' )
+
+#again but now eliminating punctuation marks in municipality names
+belgie_fortify1 <- belgie_fortify %>% 
+  mutate(id = gsubfn(paste(names(unwanted_array), collapse = '|'), unwanted_array, toupper(id))) 
+
+glimpse(belgie_fortify1)
+```
+
+
+```{r, message = FALSE, error = FALSE, warning = FALSE, eval = FALSE}
 library(RColorBrewer)
 library(classInt)
 library(ggmap)
@@ -198,3 +218,4 @@ ratio.map <- map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut)
 ggplotly(ratio.map)
 ```
 
+It is observed that in the Brussels-Capital Region many municipalities exist with higher ratios compared to the nation-wide average.

@@ -1,5 +1,5 @@
 ---
-title: "Project 1: Concentration risk tool"
+title: "Project 1: Concentration risk"
 output:
   html_document:
     toc: true
