@@ -169,35 +169,15 @@ belgie_fortify <- readRDS("belgie_fortify.rds")
 ```
 
 ```{r, message = FALSE, error = FALSE, warning = FALSE, eval = TRUE}
-library(RColorBrewer)
 library(classInt)
 library(ggmap)
-
-RedYellowGreen7 <- rev(brewer.pal(7, 'RdYlGn'))
-Blues7 <- brewer.pal(7, 'Blues')
 
 #fisher jenks breaks function
 fisher7 <- function(data){
   classIntervals(data, n=7, style='fisher', intervalClosure='right')[[2]]
 }
 
-#transparent legend
-transparent_legend =  theme(
-  legend.background = element_rect(fill = "transparent"),
-  legend.key = element_rect(fill = "transparent", color = "transparent")
-)
 
-#function to plot maps
-map_belgium_disc <- function(data, mapping, naam, palette) {
-  ggplot(data, aes(x = long, y = lat, group = group)) + #data should be object produced by fortify function
-    geom_polygon(mapping) + #choose which categorized variable should be plotted
-    scale_fill_manual(name = naam, values = palette) +
-    coord_map() + #uses Mercator projection as default
-    theme_nothing(legend = TRUE) +  #to get rid of everything
-    theme(legend.justification = c(0,0), legend.position = c(0,0)) + #put legend in left corner
-    guides(fill = guide_legend(reverse = TRUE)) + #reverse legend colors
-    transparent_legend
-}
 
 ```
 
@@ -231,10 +211,36 @@ colnames(belgie_fortify) <- colnames(belgie_fortify) %>% tolower()
 
 #merge this with shapefile to plot the map
 belgie_fortify0 <- left_join(belgie_fortify, finaldata0)
-library(plotly)
+```
 
-ratio.map <- map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut), "Ratio", palette = Blues7)
-ratio.map
+Create map:
+```{r}
+#transparent legend
+transparent_legend =  theme(
+  legend.background = element_rect(fill = "transparent"),
+  legend.key = element_rect(fill = "transparent", color = "transparent")
+)
+
+#function to plot maps
+map_belgium_disc <- function(data, mapping, naam, palette) {
+  ggplot(data, aes(x = long, y = lat, group = group)) + #data should be object produced by fortify function
+    geom_polygon(mapping) + #choose which categorized variable should be plotted
+    scale_fill_manual(name = naam, values = palette) +
+    coord_map() + #uses Mercator projection as default
+    theme_nothing(legend = TRUE) +  #to get rid of everything
+    theme(legend.justification = c(0,0), legend.position = c(0,0)) + #put legend in left corner
+    guides(fill = guide_legend(reverse = TRUE)) + #reverse legend colors
+    transparent_legend
+}
+
+#CREATES NICE LOOKING COLOR PALETTES ESPECIALLY FOR THEMATIC MAPS
+library(RColorBrewer)
+
+#BLUES PALETTE WITH SEVEN COLORS
+blues7 <- brewer.pal(7, 'Blues')
+
+#CREATE MAP
+map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut), "Ratio", palette = Blues7)
 
 ```
 
