@@ -240,7 +240,7 @@ library(RColorBrewer)
 blues7 <- brewer.pal(7, 'Blues')
 
 #CREATE MAP
-map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut), "Ratio", palette = Blues7)
+map_belgium_disc(belgie_fortify0, aes(fill = ratio.nclaims.exp.cut), "Ratio", palette = blues7)
 
 ```
 
