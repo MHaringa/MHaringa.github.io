@@ -1,5 +1,5 @@
 ---
-title: "Blog"
+title: "Bootstrapping StepAIC()"
 output:
   html_document:
     toc: true
@@ -11,8 +11,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## Bootstrapping StepAIC()
 
 I work in the field of finance and find that people often rely on OLS regressions for doing predictive analysis. It’s easy to implement and everyone knows about it. OLS regression gives us a very well developed mathematical framework which can be used to develop linear relationships. These relationships can then be used to create forward looking projections. But what about the features? How does one go about selecting the right feature set which can be used to reliably predict the variable under consideration?
 
@@ -148,7 +146,7 @@ Let's draw some observations from the above output:
 - US 3M TR is selected as a predictor `r bootstrap_procedure[[1]][3]`% of the time (US 10Y TR is selected `r bootstrap_procedure[[1]][4]`% of the time)
 - Coefficient sign on the treasury variables suggest a positive relationship (since 90-95% of the time
 the coefficients were positive in nature)
-- US 3m TR had a statistically significant coefficient `r data.frame(name = dimnames(bootstrap_procedure[[3]])[[1]], waarde = as.numeric(bootstrap_procedure[[3]])) %>% dplyr::filter(name == "US.3m.TR") %>% dplyr::select(waarde) %>% as.numeric(.)`% of the time
+- US 3m TR had a statistically significant coefficient `r data.frame(name = dimnames(bootstrap_procedure[[3]])[[1]], waarde = as.numeric(bootstrap_procedure[[3]])) %>% dplyr::filter(name == "US.3m.TR") %>% dplyr::select(waarde) %>% as.numeric(.) %>% round(., 2)`% of the time
 
 The above observations can make it easier for us to decide which of the two treasury variables we could use as a possible predictor. We could also use this information to align our view regarding the HAM2 portfolio. If the portfolio is supposed to be more sensitive towards short term interest rates then this quantitative analysis supports that view.
 
