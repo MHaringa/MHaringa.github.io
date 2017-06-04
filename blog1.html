@@ -456,23 +456,23 @@ bootstrap_procedure</code></pre>
 ## Covariates selected
 ##             (%)
 ## EDHEC.LS.EQ 100
-## SP500.TR     84
-## US.3m.TR     39
-## US.10Y.TR    20
+## SP500.TR     82
+## US.3m.TR     34
+## US.10Y.TR    18
 ## 
 ## Coefficients Sign
 ##              + (%)  - (%)
 ## EDHEC.LS.EQ 100.00   0.00
-## US.3m.TR     97.44   2.56
-## US.10Y.TR    90.00  10.00
+## US.3m.TR     97.06   2.94
+## US.10Y.TR    88.89  11.11
 ## SP500.TR      0.00 100.00
 ## 
 ## Stat Significance
 ##                (%)
 ## EDHEC.LS.EQ 100.00
-## SP500.TR     88.10
-## US.3m.TR     43.59
-## US.10Y.TR    25.00
+## SP500.TR     87.80
+## US.3m.TR     35.29
+## US.10Y.TR    22.22
 ## 
 ## 
 ## The stepAIC() for the original data-set gave
@@ -502,9 +502,9 @@ bootstrap_procedure</code></pre>
 <p>Let’s draw some observations from the above output:</p>
 <ul>
 <li>EDHEC LS EQ is selected as a predictor everytime</li>
-<li>US 3M TR is selected as a predictor 39% of the time (US 10Y TR is selected 20% of the time)</li>
+<li>US 3M TR is selected as a predictor 34% of the time (US 10Y TR is selected 18% of the time)</li>
 <li>Coefficient sign on the treasury variables suggest a positive relationship (since 90-95% of the time the coefficients were positive in nature)</li>
-<li>US 3m TR had a statistically significant coefficient 25% of the time</li>
+<li>US 3m TR had a statistically significant coefficient 22.22% of the time</li>
 </ul>
 <p>The above observations can make it easier for us to decide which of the two treasury variables we could use as a possible predictor. We could also use this information to align our view regarding the HAM2 portfolio. If the portfolio is supposed to be more sensitive towards short term interest rates then this quantitative analysis supports that view.</p>
 <p>This really was a simple example but hopefully I was able to get my point across. Thanks!</p>
