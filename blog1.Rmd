@@ -1,5 +1,5 @@
 ---
-title: "Bootstrapping StepAIC()"
+title: "Blog"
 output:
   html_document:
     toc: true
@@ -11,6 +11,10 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+A personal blog about my fumblings with statistics, data visualization and anything R.
+
+# Bootstrapping StepAIC()
 
 I work in the field of finance and find that people often rely on OLS regressions for doing predictive analysis. It’s easy to implement and everyone knows about it. OLS regression gives us a very well developed mathematical framework which can be used to develop linear relationships. These relationships can then be used to create forward looking projections. But what about the features? How does one go about selecting the right feature set which can be used to reliably predict the variable under consideration?
 
@@ -51,7 +55,7 @@ glimpse(managers %>% tbl_df(.))
 Now that we have the data set loaded up, we can do some basic exploratory analysis. The Managers data set is made of the following variables:
 
 1. Hedge Fund Returns
-    - HAM1 to HAM 6
+    + HAM1 to HAM 6
 2. Risk Factors
     + EDHEC Long Short Equity
     + SP500
@@ -151,4 +155,14 @@ the coefficients were positive in nature)
 The above observations can make it easier for us to decide which of the two treasury variables we could use as a possible predictor. We could also use this information to align our view regarding the HAM2 portfolio. If the portfolio is supposed to be more sensitive towards short term interest rates then this quantitative analysis supports that view.
 
 This really was a simple example but hopefully I was able to get my point across. Thanks!
+
+# Slopegraphs in R
+
+Slopegraphs compare changes usually over time for a list of nouns located on an ordinal or interval scale. I really didn’t think tables tell stories well and I truly believe slopegraphs are pretty good at telling stories. 
+
+Many examples, the first from my The Visual Display of Quantitative Information (1983):
+
+<center><img src="images/0003nk-10289.gif" height="300" width="500"></center>
+
+From existing slopegraph functions for base graphics, the most promising one comes from Thomas Leeper. Its far from perfect, as labels don’t align nicely, but you have some control over a number of parameters. Therefore, I created my own slopegraph function in ggplot2 from scratch. 
 
