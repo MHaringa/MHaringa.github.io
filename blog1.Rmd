@@ -2,7 +2,7 @@
 title: "Blog"
 output:
   html_document:
-    toc: true
+    toc: false
     toc_float:
       collapsed: false
     number_sections: false
@@ -12,9 +12,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# {.tabset .tabset-fade}
 A personal blog about my fumblings with statistics, data visualization and anything R.
 
-# Bootstrapping StepAIC()
+## Bootstrapping StepAIC()
 
 I work in the field of finance and find that people often rely on OLS regressions for doing predictive analysis. It’s easy to implement and everyone knows about it. OLS regression gives us a very well developed mathematical framework which can be used to develop linear relationships. These relationships can then be used to create forward looking projections. But what about the features? How does one go about selecting the right feature set which can be used to reliably predict the variable under consideration?
 
@@ -156,7 +157,8 @@ The above observations can make it easier for us to decide which of the two trea
 
 This really was a simple example but hopefully I was able to get my point across. Thanks!
 
-# Slopegraphs in R
+
+## Slopegraphs in R
 
 Slopegraphs compare changes usually over time for a list of nouns located on an ordinal or interval scale. I really didn’t think tables tell stories well and I truly believe slopegraphs are pretty good at telling stories. 
 
