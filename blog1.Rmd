@@ -51,12 +51,12 @@ glimpse(managers %>% tbl_df(.))
 Now that we have the data set loaded up, we can do some basic exploratory analysis. The Managers data set is made of the following variables:
 
 1. Hedge Fund Returns
-  - HAM1 to HAM 6
+    - HAM1 to HAM 6
 2. Risk Factors
-  - EDHEC Long Short Equity
-  - SP500
-  - US 10 Year Treasury yield
-  - US 3month Treasuty yield
+    + EDHEC Long Short Equity
+    + SP500
+    + US 10 Year Treasury yield
+    + US 3month Treasuty yield
 
 Lets try to plot the kind of relationship HAM2 has with each of the risk factors. We’ll use the pairs function.
 
