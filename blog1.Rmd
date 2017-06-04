@@ -98,16 +98,16 @@ pred_df <- df %>%
 We didn't do so bad. We got an R-Square of around 50%. Our adjusted and multiple R-Square values are close to each other, we had enough degrees of freedom and most of our predictor variables are statistically significant.
 
 ```{r check, warning = FALSE, message = FALSE}
-pred_df %>% na.omit() %>%
-ggplot(., aes(x = HAM2, y = OLS)) +
-  geom_point() +
-  geom_rangeframe() +
-  theme_tufte() + 
-  scale_x_continuous(breaks = extended_range_breaks()(pred_df %>% na.omit() %>% select(HAM2))) +
-  scale_y_continuous(breaks = extended_range_breaks()(pred_df %>% na.omit() %>% select(OLS) %>% round(., 3))) +
+
+library(plotly)
+actual_fitted_plot <- ggplot(data = pred_df, aes(x = HAM2, y = OLS)) +
+  geom_point(colour = "dodgerblue") +
   ggtitle("Actual vs Fitted values") +
   xlab("Actual values") +
   ylab("Fitted values")
+
+# CREATE INTERACTIVE GGPLOT2 CHARTS
+ggplotly(actual_fitted_plot)
 ```
 
 ### Stepwise Selection
@@ -123,10 +123,10 @@ In this case the stepwise procedure removes both the treasury variables to arriv
 
 ### Comparison Table
 
-                      | Parameter	Full Model  | Trimmed Model
---------------------- | --------------------- | ---------------------
-R-Squared             | 52.54%                | 52.08%
-Adj R-Squared	        | 50.89%                | 51.26%
+(Adj) R-squared \ model | Parameter	Full Model  | Trimmed Model
+----------------------- | --------------------- | ---------------------
+R-Squared               | 52.54%                | 52.08%
+Adj R-Squared	          | 50.89%                | 51.26%
 
 Notice that even though we have only two predictor variables, the model’s predictive power hasn’t changed a lot.
 
