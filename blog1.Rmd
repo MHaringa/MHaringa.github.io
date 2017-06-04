@@ -20,3 +20,137 @@ Stepwise variable selection is one of the most commonly used variable selection 
 
 One of the ways one could make the stepwise selection process more reliable is by bootstrapping it. The process can be broken down into the following steps:
 
+1. Select a random subset from your data set
+2. Run stepwise selection on this subset
+3. Record the features that were selected
+4. Repeat steps 1 to 3 many times
+
+The end result is that now we can see how many times a specific feature (predictor variable) gets selected. Now, this bootstrapping technique just creates a random data set from the given data set (drawing with replacement). One could try to run a bootstrap procedure by creating a random starting point for the stepwise algorithm to work on.
+
+Hopefully this little extra step would give you some insight as to which predictor variables could be most useful.
+
+The bootStepAIC package is written by Dimitris Rizopoulos.
+
+The following code snippets follow the post above. For this simple example I'll use the Managers data set in the Performance Analytics package.
+
+Lets first install the required package.
+
+```{r, warning = FALSE, message = FALSE}
+#Loads package into memory
+library(PerformanceAnalytics)
+library(dplyr)
+library(ggplot2)
+library(modelr)
+library(ggthemes)
+
+#Load 'Managers' dataset
+data(managers) 
+
+#The data sets looks like this
+glimpse(managers %>% tbl_df(.))
+```
+
+Now that we have the data set loaded up, we can do some basic exploratory analysis. The Managers data set is made of the following variables:
+
+1. Hedge Fund Returns
+  - HAM1 to HAM 6
+2. Risk Factors
+  - EDHEC Long Short Equity
+  - SP500
+  - US 10 Year Treasury yield
+  - US 3month Treasuty yield
+
+Lets try to plot the kind of relationship HAM2 has with each of the risk factors. We’ll use the pairs function.
+
+```{r pairs, warning=FALSE, message=FALSE}
+#Create a dataframe using HAM2 and the risk factors
+df <- tbl_df(managers) %>% 
+  dplyr::select(HAM2, `EDHEC LS EQ`, `SP500 TR`, `US 10Y TR`, `US 3m TR`) 
+
+names(df) <- make.names(names(df)) 
+
+#The data frame should look like this
+glimpse(df)
+
+#Pairs plot
+GGally::ggpairs(df) 
+
+```
+
+### Variable selection
+Now for the fun part. As a simple example, lets try to use the avaliable risk factors to predict the returns for manager 2 (HAM2)
+
+### LM Fit
+As a first case, lets use all the available risk factors to predict future returns for HAM2. We’ll be using the lm function.
+
+```{r fit, warning = FALSE, message = FALSE}
+#Formula for lm function
+linear_model <- lm(HAM2 ~ EDHEC.LS.EQ + SP500.TR + US.10Y.TR + US.3m.TR, data = df)
+
+#The output from the summary function on a lm object should look like this
+summary(linear_model)
+
+pred_df <- df %>%
+  add_predictions(linear_model, var = "OLS")
+
+```
+
+We didn't do so bad. We got an R-Square of around 50%. Our adjusted and multiple R-Square values are close to each other, we had enough degrees of freedom and most of our predictor variables are statistically significant.
+
+```{r check, warning = FALSE, message = FALSE}
+pred_df %>% na.omit() %>%
+ggplot(., aes(x = HAM2, y = OLS)) +
+  geom_point() +
+  geom_rangeframe() +
+  theme_tufte() + 
+  scale_x_continuous(breaks = extended_range_breaks()(pred_df %>% na.omit() %>% select(HAM2))) +
+  scale_y_continuous(breaks = extended_range_breaks()(pred_df %>% na.omit() %>% select(OLS) %>% round(., 3))) +
+  ggtitle("Actual vs Fitted values") +
+  xlab("Actual values") +
+  ylab("Fitted values")
+```
+
+### Stepwise Selection
+Now lets see if we can improve on the model by removing any of the predictor variables. We'll use the stepAIC function in the MASS package.
+
+```{r stepfit, warning = FALSE, message = FALSE}
+#I am using trace = F to suppress the output from the stepAIC function
+stepfit <- MASS::stepAIC(object = linear_model, scope = list(upper = ~ ., lower = ~1), direction = "backward", trace=F)
+summary(stepfit)
+```
+
+In this case the stepwise procedure removes both the treasury variables to arrive at a slightly more parsimonious model containing only 2 variables.
+
+### Comparison Table
+
+                      | Parameter	Full Model  | Trimmed Model
+--------------------- | --------------------- | ---------------------
+R-Squared             | 52.54%                | 52.08%
+Adj R-Squared	        | 50.89%                | 51.26%
+
+Notice that even though we have only two predictor variables, the model’s predictive power hasn’t changed a lot.
+
+What if we wanted to add a treasury variable to the mix? Which one would you pick? If we had some prior knowledge regarding HAM2 portfolio holdings, we might be able to make a qualitative judgement regarding whether to use the 10 year or the 3 month treasury yield. If not, we could use the bootstrap procedure to derive some useful information.
+
+```{r bootstep, warning = FALSE, message = FALSE}
+#Install the package
+#install.packages("bootStepAIC",repos="http://cran.us.r-project.org")
+
+#Run bootstrap procedure
+bootstrap_procedure <- bootStepAIC::boot.stepAIC(object = linear_model, data = df)
+bootstrap_procedure
+
+```
+
+Let's draw some observations from the above output:
+
+- EDHEC LS EQ is selected as a predictor everytime
+- US 3M TR is selected as a predictor `r bootstrap_procedure[[1]][3]`% of the time (US 10Y TR is selected `r bootstrap_procedure[[1]][4]`% of the time)
+- Coefficient sign on the treasury variables suggest a positive relationship (since 90-95% of the time
+the coefficients were positive in nature)
+- US 3m TR had a statistically significant coefficient `r round(bootstrap_procedure[[3]][4],2)`% of the time
+
+The above observations can make it easier for us to decide which of the two treasury variables we could use as a possible predictor. We could also use this information to align our view regarding the HAM2 portfolio. If the portfolio is supposed to be more sensitive towards short term interest rates then this quantitative analysis supports that view.
+
+This really was a simple example but hopefully I was able to get my point across. Thanks!
+
