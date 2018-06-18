@@ -168,3 +168,95 @@ Many examples, the first from my The Visual Display of Quantitative Information 
 
 From existing slopegraph functions for base graphics, the most promising one comes from Thomas Leeper. Its far from perfect, as labels don’t align nicely, but you have some control over a number of parameters. Therefore, I created my own slopegraph function in ggplot2 from scratch. 
 
+```{r slopegraph, warning = FALSE, message = FALSE}
+library(ggrepel)
+
+newggslopegraph <- function(dataframe, Times, Measurement, Grouping,
+                            Title = NULL,
+                            SubTitle = NULL,
+                            Caption = NULL,
+                            XTextSize = 12,
+                            YTextSize = 3,
+                            TitleTextSize = 14,
+                            SubTitleTextSize = 10,
+                            CaptionTextSize = 8,
+                            LineThickness = 1,
+                            LineColor = "ByGroup",
+                            DataTextSize = 2.5)
+  {
+
+  MySpecial <- list(
+    scale_x_discrete(position = "top"), # move the x axis labels up top
+    theme_bw(),
+    theme(legend.position  = "none"), # Remove legend legend
+    theme(panel.border     = element_blank()), # Remove the panel border
+    theme(axis.title.y     = element_blank()), # Remove just about everything from the y axis
+    theme(axis.text.y      = element_blank()),
+    theme(panel.grid.major.y = element_blank()),
+    theme(panel.grid.minor.y = element_blank()),
+    theme(axis.title.x     = element_blank()), # Remove a few things from the x axis
+    theme(panel.grid.major.x = element_blank()),
+    theme(axis.text.x.top      = element_text(size = XTextSize)), # and increase font size
+    theme(axis.ticks       = element_blank()), # Remove x & y tick marks
+    theme(plot.title       = element_text(size = TitleTextSize, face = "bold")), # Format title
+    theme(plot.title       = element_text(hjust = 0.5)), # Center title & subtitle
+    theme(plot.subtitle    = element_text(hjust = 0.5, size = SubTitleTextSize)),
+    theme(plot.caption     = element_text(size = CaptionTextSize))
+  )
+
+  Ndataframe <- deparse(substitute(dataframe)) 
+  NTimes <- deparse(substitute(Times)) 
+  NMeasurement <- deparse(substitute(Measurement)) 
+  NGrouping <- deparse(substitute(Grouping)) 
+  
+  Times <- enquo(Times)
+  Measurement <- enquo(Measurement)
+  Grouping <- enquo(Grouping)
+
+  if (length(LineColor) > 1) { 
+    if (length(LineColor) < length(unique(dataframe[[NGrouping]]))) {
+      message(paste0("\nYou gave me ", length(LineColor), " colors I'm recycling because you have ", 
+                     length(unique(dataframe[[NGrouping]])), " ", NGrouping, "\n"))
+      LineColor <- rep(LineColor, length.out = length(unique(dataframe[[NGrouping]])))
+    }
+    LineGeom <- list(geom_line(aes_(color = Grouping), size = LineThickness), scale_color_manual(values = LineColor))
+  } else {
+    if (LineColor == "ByGroup") {
+      LineGeom <- list(geom_line(aes_(color = Grouping, alpha = 1), size = LineThickness))
+    } else {
+      LineGeom <- list(geom_line(aes_(), size = LineThickness, color = LineColor))
+    }
+  }
+  
+    dataframe %>%
+      filter(!is.na(!! Times), !is.na(!! Measurement), !is.na(!! Grouping))  %>%
+      ggplot(aes_(group = Grouping, y = Measurement, x = Times)) +
+        LineGeom +
+        geom_text_repel(data = dataframe %>% filter(!! Times == min(!! Times)),
+                        aes_(label = Grouping) ,
+                        hjust = "left",
+                        fontface = "bold",
+                        size = YTextSize,
+                        nudge_x = -.45,
+                        direction = "y") +
+        geom_text_repel(data = dataframe %>% filter(!! Times == max(!! Times)),
+                        aes_(label = Grouping),
+                        hjust = "right",
+                        fontface = "bold",
+                        size = YTextSize,
+                        nudge_x = .5,
+                        direction = "y") +
+        geom_label(aes_(label = Measurement), size = DataTextSize, label.padding = unit(0.05, "lines"), label.size = 0.0) +
+        MySpecial +
+        labs(title = Title, subtitle = SubTitle, caption = Caption)
+} 
+```
+
+Create slopegraph:
+
+```{r}
+library(tidyverse)
+newcancer <- readRDS("newcancer.rds") 
+newggslopegraph(newcancer, Year, Survival, Type, Title = "Estimates of Percent Survival Rates")
+```
+
