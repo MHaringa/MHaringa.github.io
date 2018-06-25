@@ -6,6 +6,7 @@ output:
     toc_float:
       collapsed: false
     number_sections: false
+runtime: shiny_prerendered
 ---
 
 # Introduction
