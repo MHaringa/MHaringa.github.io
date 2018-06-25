@@ -9,103 +9,362 @@ output:
 ---
 
 # Introduction
-The goal of this project is to determine the coördinates (long/lat) in the Netherlands with the highest concentration risks. Concentration risk is defined as the cumulation of all exposures within a certain radius. 
+The goal of this project is to determine the coördinates (long/lat) in the Netherlands with the highest concentration risks. Concentration risk is defined as the cumulation of all exposures within a certain radius. And it is used today by regulators who, working in the context of Solvency II, for example, ask insurance companies to report their maximum exposure within a 200-meter radius. 
 
-The algorithm is using an iterative procedure to find the coördinates with the highest concentration risk within a certain area:
 
-<center><img src="images/Beschrijving_algoritme2.png" height="150" width="300"></center>
 
-## Algorithm 
-
-The solution is given by:
-
-```{r, eval = FALSE}
-library(dplyr)
-library(tidyr)
-library(geosphere)
+```{r, warning = FALSE, include = FALSE, message = FALSE}
 library(ggmap)
-library(RColorBrewer)
-library(classInt)
+library(dplyr) 
+library(shiny)
+library(leaflet)
+library(data.table)
+library(spatialrisk)
+#devtools::install_github(repo = "MHaringa/spatialrisk")
 
-alle.adressen <- readRDS("data/alle_adressen.rds")
-
-#nieuw <- alle.adressen %>% mutate(huisnrtoevoeging = paste0(huisletter, huisnrtoev)) 
-
-alle.adressen.som <- alle.adressen %>% 
-  mutate(som = oppervlakte+1) %>% #maak fictieve verzekerde sommen
-  sample_n(. , 2e6) #maak portfolio van 2 miljoen polissen
-
-expand <- function(west, oost, zuid, noord, breedte.blok){ #functie om raster te maken
-  breedte <- distHaversine(c(west, zuid), c(oost, zuid)) / breedte.blok #breedte.blok in meters
-  hoogte <- distHaversine(c(west, zuid), c(west, noord)) / breedte.blok
-  expand.grid(long = seq(west, oost, length.out = breedte), lat = seq(zuid, noord, length.out = hoogte))
-}
-
-totaal.in.blok <- function(long, lat, breedte.blok){ #functie om totale verzekerde som per blok te bepalen; long/lat is middelpunt van blok
-  
-  blok <-  data.frame(long = long, lat = lat) %>% 
-    mutate(west = destPoint(c(long, lat), 270, breedte.blok/2+200)[[1]]) %>%
-    mutate(oost = destPoint(c(long, lat), 90, breedte.blok/2+200)[[1]]) %>%
-    mutate(zuid = destPoint(c(long, lat), 180, breedte.blok/2+200)[[2]]) %>%
-    mutate(noord = destPoint(c(long, lat), 360, breedte.blok/2+200)[[2]])
-  
-  blok.som <- alle.adressen.som %>% 
-    filter(., longitude > blok$west & longitude < blok$oost) %>% 
-    filter(., latitude > blok$zuid & latitude < blok$noord) %>% 
-    select(som) 
-  if (nrow(blok.som)==0) {0} else as.numeric(sum(blok.som))
-}
-
-iteratie <- function(stap, breedte.blok){
-  result1 <- stap %>% select(long, lat) %>% rowwise() %>% 
-    mutate(west = destPoint(c(long, lat), 270, (breedte.blok/2))[[1]]) %>%
-    mutate(oost = destPoint(c(long, lat), 90, (breedte.blok/2))[[1]]) %>%
-    mutate(zuid = destPoint(c(long, lat), 180, (breedte.blok/2))[[2]]) %>%
-    mutate(noord = destPoint(c(long, lat), 360, (breedte.blok/2))[[2]]) %>%
-    select(-lat, -long)
-  result2 <- apply(result1[,c(1:4)], 1, function(x) expand(x[1], x[2], x[3], x[4], breedte.blok)) %>%
-    data.frame(.) %>% gather(., condition, lat, lat:ncol(.)) %>% select(long, lat)
-  result2 %>% rowwise() %>%
-    mutate(som = totaal.in.blok(long, lat, breedte.blok)) %>% 
-    filter(som > som.grens) #grens boven 10000 euro
-}
+```
 
 
-#iteratie: 200m > 400m > 800m > 1600m > 3200m > 6400m > 12800m > 25600m ..........  (> 51200m > 102400m)  
-stap0 <- expand(3.27, 7.23, 50.75, 53.5, 25600) #blokken van 25600 meter 
-stap1 <- stap0 %>% rowwise() %>% mutate(som = totaal.in.blok(long,lat, 25600)) %>% filter(som > 10000) 
-stap2 <- iteratie(stap1, 12800) #blokken van 12800 meter
-stap3 <- iteratie(stap2, 6400) #blokken van 6400 meter
-stap4 <- iteratie(stap3, 3200) #blokken van 3200 meter
-stap5 <- iteratie(stap4, 1600) #blokken van 1600 meter
-stap6 <- iteratie(stap5, 800) #blokken van 800 meter
-stap7 <- iteratie(stap6, 400) #blokken van 400 meter
-stap8 <- iteratie(stap7, 200) #blokken van 200 meter
+## Waarom meten we concentratierisico? 
 
-coordinaten.boven.grens <- function(som.grens){
-  stap0 <- expand(3.27, 7.23, 50.75, 53.5, 25600) #blokken van 25600 meter 
-  stap1 <- stap0 %>% rowwise() %>% mutate(som = totaal.in.blok(long,lat, 25600)) %>% filter(som > som.grens) 
-  stap2 <- iteratie(stap1, 12800, som.grens) #blokken van 12800 meter
-  stap3 <- iteratie(stap2, 6400, som.grens) #blokken van 6400 meter
-  stap4 <- iteratie(stap3, 3200, som.grens) #blokken van 3200 meter
-  stap5 <- iteratie(stap4, 1600, som.grens) #blokken van 1600 meter
-  stap6 <- iteratie(stap5, 800, som.grens) #blokken van 800 meter
-  stap7 <- iteratie(stap6, 400, som.grens) #blokken van 400 meter
-  stap8 <- iteratie(stap7, 200, som.grens) #blokken van 200 meter 
-  stap9 <- iteratie(stap8, 100, som.grens) #blokken van 100 meter + overlap van 200 meter
+### EIOPA schrijft voor:
+"Largest fire concentration in respect of the fire peril within a radius of 200m. This is the maximum gross sum insured of the set of buildings fully or partly located within this radius." -- *Solvency II (SF)*
+
+### Achtergrond:
+- Bestand tegen catastrofes.
+- Tot halverwege 2017 het enige risico dat we niet konden meten. 
+- Nu meten we ook concentratierisico zoals voorgeschreven.
+
+
+## Hoe meten we concentratierisico? 
+
+### Stappen:
+1. Trek rond elk adres een cirkel met een straal van 200 meter. 
+2. Tel verzekerde sommen binnen elke cirkel op. 
+3. Orden de verkregen **concentraties** van groot naar klein. 
+
+
+### Uitdaging:
+Herhaal deze stappen voor alle circa 350.000 adressen. 
+
+# Hoe werkt het algoritme? 
+
+## Voorbeeld
+Concentratierisico voor Grote Markt 1, Groningen. 
+
+
+```{r}
+
+centrum <- c(6.568865, 53.21828)
+
+set.seed(2)
+df <- Groningen %>% 
+  sample_n(2000) %>%
+  points_in_circle(., centrum[1], centrum[2], radius = 530)
+
+blok <- block_around_point(centrum[1], centrum[2], radius = 200)
+
+icons_fn <- function(icoon, kleur){
+  awesomeIcons(
+    icon = icoon,
+    iconColor = 'black',
+    library = 'ion',
+    markerColor = kleur
+    )
 }
 ```
 
 
+```{r}
+p1 <- leaflet(df, width = "100%") %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  addAwesomeMarkers(lng = centrum[1], lat = centrum[2], icon = icons_fn("ion-ios-star", "red"), popup = "Grote Markt 1, Groningen") 
 
-```{r, warning = FALSE, error = FALSE, message=FALSE, echo = FALSE} 
-library(plotly) 
-library(ggplot2) 
-library(dplyr) 
-library(leaflet) 
+p1
 
-leaflet() %>% 
-  addTiles %>% # Add default OpenStreetMap map tiles 
-  setView(lng = 5.0, lat = 51.0, zoom = 6) 
+```
 
-``` 
+
+
+## Voorbeeld
+Welke adressen liggen binnen een straal van 200 meter? 
+
+```{r}
+
+p2 <- p1 %>%
+  addAwesomeMarkers(lng = ~lon, lat = ~lat, icon = icons_fn("ion-ios-home-outline", "orange"))
+
+p2
+```
+
+## Aanpak 1 
+Bereken de afstand tussen de rode marker en alle andere markers. Werkt dit? 
+
+```{r}
+p2
+```
+
+
+## Haversine formule
+De Haversine ('half-versed-sine') formule bepaalt de kortste afstand tussen twee punten op een globe. 
+
+```{r, echo = TRUE}
+lat_from <- 53.24007; lon_from <- 6.520386; lat_to <- 53.24054; lon_to <- 6.520386
+
+toRad <- pi/180 # Naar radialen
+lat_to <- lat_to * toRad; lat_from <- lat_from * toRad
+lon_to <- lon_to * toRad; lon_from <- lon_from * toRad
+dLat <- (lat_to - lat_from); dLon <- (lon_to - lon_from)
+
+a <- (sin(dLat/2)^2) + (cos(lat_from) * cos(lat_to)) * (sin(dLon/2)^2)
+2 * atan2(sqrt(a), sqrt(1 - a)) * 6378137 # Radius globe 
+```
+
+
+## Aanpak 2 
+Pas Haversine formule toe op een deel van de adressen. Blok om Grote Markt 1? 
+
+```{r, echo = TRUE}
+lat_center <- 53.24007; lon_center <- 6.520386; radius <- 200; omtrek_aarde <- 40075000 
+
+one_lat_in_meters <- omtrek_aarde / 360
+one_lon_in_meters <- omtrek_aarde * cos(lat_center * pi / 180) / 360
+
+zuid_lat <- lat_center - radius / one_lat_in_meters
+noord_lat <- lat_center + radius / one_lat_in_meters
+west_lon <- lon_center - radius / one_lon_in_meters
+oost_lon <- lon_center + radius / one_lon_in_meters
+c(zuid_lat, noord_lat, west_lon, oost_lon) 
+
+```
+
+## Aanpak 2
+Blok van 400 x 400 meter om Grote Markt 1.
+
+```{r}
+
+p3 <- p2 %>%
+  addAwesomeMarkers(lng = blok[4], lat = centrum[2], icon = icons_fn("ion-arrow-right-c", "blue")) %>%
+  addAwesomeMarkers(lng = blok[3], lat = centrum[2], icon = icons_fn("ion-arrow-left-c", "blue")) %>%
+  addAwesomeMarkers(lng = centrum[1], lat = blok[1], icon = icons_fn("ion-arrow-down-c", "blue")) %>%
+  addAwesomeMarkers(lng = centrum[1], lat = blok[2], icon = icons_fn("ion-arrow-up-c", "blue")) 
+
+p3
+```
+
+## Aanpak 2
+Blok van 400 x 400 meter om Grote Markt 1.
+
+```{r}
+p4 <- p3 %>%
+  addRectangles(
+    lng1=blok[3], lat1=blok[1],
+    lng2=blok[4], lat2=blok[2],
+    fillColor = "transparent"
+  )
+
+p4
+```
+
+
+## Aanpak 2
+Pas Haversine formule alleen toe op adressen in het blok. 
+
+```{r}
+data_binnen_blok <- df[df$lon > blok[3] &
+                       df$lon < blok[4] &
+                       df$lat > blok[1] &
+                       df$lat < blok[2], ]
+
+data_buiten_blok <- setdiff(df, data_binnen_blok)
+
+p4 <- p1 %>%
+  addRectangles(
+    lng1 = blok[3], lat1 = blok[1],
+    lng2 = blok[4], lat2 = blok[2],
+    fillColor = "transparent"
+  ) %>%
+  addAwesomeMarkers(data = data_buiten_blok, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "lightgray")) %>%
+  addAwesomeMarkers(data = data_binnen_blok, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "orange"))
+
+p4
+```
+
+## Aanpak 2
+Pas Haversine formule alleen toe op adressen in het blok. 
+
+```{r}
+
+data_binnen_cirkel <- df %>% filter(distance < 200)
+data_buiten_cirkel <- setdiff(df, data_binnen_cirkel)
+
+p5 <- p1 %>%
+  addRectangles(
+    lng1 = blok[3], lat1 = blok[1],
+    lng2 = blok[4], lat2 = blok[2],
+    fillColor = "transparent"
+  ) %>%
+  addAwesomeMarkers(data = data_buiten_cirkel, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "lightgray")) %>%
+  addAwesomeMarkers(data = data_binnen_cirkel, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "orange"), 
+                                           popup = ~paste0(strong("Plaats: "), city, br(), strong("Verzekerde som: "), amount, " euro",  
+                                       br(), strong("Postcode: "), postal_code, br(), strong("Huisnummer: "), 
+                                       number, br(), strong("Huisletter: "), letter, br(), strong("Huisnrtoev: "), 
+                                       suffix, br(), strong("Straat: "), street, br(), strong("Afstand: "), 
+                                       round(distance, 1), " meter"))
+p5
+
+```
+
+
+## Aanpak 2
+Pas Haversine formule alleen toe op adressen in het blok. 
+
+```{r}
+p6 <- p5 %>%
+  addCircles(lng = 6.568865, lat = 53.21828, stroke = FALSE,
+    radius = 200, color = "red", fillOpacity = .2
+  )
+
+p6
+```
+
+## Aanpak 2
+Sommeer de verzekerde sommen van de adressen in de cirkel. 
+
+```{r}
+
+concentratie_som <- sum(data_binnen_cirkel$amount)
+
+p6 <- p5 %>%
+  addCircles(lng = 6.568865, lat = 53.21828, stroke = FALSE,
+    radius = 200, color = "red", fillOpacity = .2) %>%
+    addAwesomeMarkers(lng = centrum[1], lat = centrum[2], icon = icons_fn("ion-ios-star", "red"), 
+                      label = ~paste0("Concentration: ", concentratie_som, " Euro"), 
+                      labelOptions = labelOptions(noHide = T),
+                      options = popupOptions(keepInView = TRUE))
+p6
+```
+
+## Samengevat
+1. Maak een blok van 400 x 400 meter rond Grote Markt 1
+2. Pas Haversine formule toe op de adressen in het blok
+3. Sommeer verzekerde sommen van de adressen binnen een straal van 200m
+4. Herhaal deze stappen voor alle circa 350.000 adressen in AAS-portefeuille
+
+
+
+
+# RShiny Concentration risk tool
+
+
+```{r}
+
+shinyApp(
+
+ui = navbarPage("Concentratierisicotool", id="nav", windowTitle = "Concentratierisico", 
+
+  tabPanel("Interactieve kaart op adres",
+    div(class="outer",
+
+      tags$head(
+        includeCSS("css/styles2.css")
+      ),
+
+      leafletOutput("map", width="100%", height="100%"),
+    
+      absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+        draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+        width = 330, height = "auto",
+        br(),
+        textInput("text1", label = "Postcode (bijv. 9712HN):"),
+        textInput("text2", label = "Huisnummer (bijv. 1):"),
+        textInput("text3", label = "Huisletter:"),
+        textInput("text4", label = "Huisnummertoevoeging:"),
+        hr(),
+        p("De rode cirkel om het gekozen adres geeft een straal van 200 meter aan."),
+        hr(),
+        h5(textOutput("text9"))
+      )
+    ))), 
+
+server =  function(input, output, session){ ## Interactive Map ###########################################
+
+  # Create the map
+  output$map <- renderLeaflet({
+    postcode1 <- toupper(gsub(" ", "", input$text1)) 
+    huisnummer0 <- input$text2
+    coords <- spatialrisk::Groningen %>% 
+              filter(postal_code == postcode1) %>% 
+              select(lon, lat) %>% 
+              slice(1) %>% 
+              as.numeric(.)
+    
+    if (postcode1 %in% Groningen$postal_code) 
+        leaflet() %>%
+          addTiles() %>%
+          setView(lng = coords[1], lat = coords[2], zoom = 16) 
+    else{
+        leaflet() %>%
+          addTiles() %>%
+          setView(lng = 5, lat = 52, zoom = 8)
+      } 
+    })
+  
+  
+  observe({
+    postcode1 <- toupper(gsub(" ", "", input$text1)) 
+    huisnummer0 <- input$text2
+    coords <- spatialrisk::Groningen %>% 
+              filter(postal_code == postcode1) %>% 
+              select(lon, lat) %>% 
+              slice(1) %>% 
+              as.numeric(.)
+    
+    block <- spatialrisk::block_around_point(lon = coords[[1]], lat = coords[[2]])
+    
+    data <- spatialrisk::Groningen %>% sample_n(2000)
+    
+    data_sub <- data[data$lon > block[3] &
+                   data$lon < block[4] &
+                   data$lat > block[1] &
+                   data$lat < block[2], ]
+    
+    uitkomst <- sum(data_sub$amount, na.rm = TRUE)
+    
+    output$text9 <- renderText({paste("De concentratie (straal 200 meter) op dit adres bedraagt:", uitkomst, "euro.")}) 
+    
+    set.seed(2)
+    df <- Groningen %>%
+      sample_n(2000) #%>%
+      #points_in_circle(., coords[1], coords[2], radius = 330)
+    
+    leafletProxy("map") %>% 
+      clearShapes() %>%
+      addCircles(lng = coords[1], lat = coords[2], stroke = FALSE,
+                 radius = 200, color = "red", fillOpacity = .2) %>%
+      addAwesomeMarkers(data = df, lng = ~lon, lat = ~lat, icon = icons_fn("ion-ios-home-outline", "orange"), 
+                         popup = ~paste0(strong("Plaats: "), city, br(), strong("Verzekerde som: "), amount, " euro",  
+                                       br(), strong("Postcode: "), postal_code, br(), strong("Huisnummer: "), 
+                                       number, br(), strong("Huisletter: "), letter, br(), strong("Huisnrtoev: "), 
+                                       suffix, br(), strong("Straat: "), street)) %>%
+      addAwesomeMarkers(lng = coords[1], lat = coords[2], 
+                        icon = icons_fn("ion-ios-star", "red")) 
+    })
+}
+)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
