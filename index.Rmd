@@ -35,7 +35,7 @@ $("#pageContent").removeClass("standardPadding");
           <div><a href="concentration.html"><button class="bigButton getStarted">Project 1: Concentration risk</button></a></div>
         </div>
     </div>
-    <img class="imageTwo" src="images/thesisvoorblad.png"/>
+    <img class="imageTwo" src="images/concentration_image.png"/>
   </div>
 
   <div class="band full third rightText">
