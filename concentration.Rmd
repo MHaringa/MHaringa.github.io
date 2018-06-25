@@ -356,7 +356,7 @@ server =  function(input, output, session){ ## Interactive Map #################
 ```
 
 
-```{r}
+```{r, include = FALSE, eval = FALSE}
 knitr::include_app("https://martinharinga.shinyapps.io/PCtool/")
 ```
 
