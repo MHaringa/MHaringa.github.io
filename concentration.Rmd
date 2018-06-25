@@ -11,7 +11,14 @@ output:
 # Introduction
 The goal of this project is to determine the coördinates (long/lat) in the Netherlands with the highest concentration risks. Concentration risk is defined as the cumulation of all exposures within a certain radius. And it is used today by regulators who, working in the context of Solvency II, for example, ask insurance companies to report their maximum exposure within a 200-meter radius. 
 
+The calculations given below are summarized in the R-package spatialrisk. spatialrisk is an R-package for spatial risk calculations. In particular, it can be used to determine concentration risk. The package is currently work-in-progress and contributions are welcome.
 
+The quickest way to get the development version of the package running locally is using devtools:
+
+```{r, warning = FALSE, eval = FALSE, message = FALSE}
+devtools::install_github(repo = "MHaringa/spatialrisk")
+library(spatialrisk)
+```
 
 ```{r, warning = FALSE, include = FALSE, message = FALSE}
 library(ggmap)
@@ -27,10 +34,10 @@ library(spatialrisk)
 
 ## Waarom meten we concentratierisico? 
 
-### EIOPA schrijft voor:
+EIOPA schrijft voor:
 "Largest fire concentration in respect of the fire peril within a radius of 200m. This is the maximum gross sum insured of the set of buildings fully or partly located within this radius." -- *Solvency II (SF)*
 
-### Achtergrond:
+Achtergrond:
 - Bestand tegen catastrofes.
 - Tot halverwege 2017 het enige risico dat we niet konden meten. 
 - Nu meten we ook concentratierisico zoals voorgeschreven.
@@ -38,18 +45,17 @@ library(spatialrisk)
 
 ## Hoe meten we concentratierisico? 
 
-### Stappen:
+Stappen:
 1. Trek rond elk adres een cirkel met een straal van 200 meter. 
 2. Tel verzekerde sommen binnen elke cirkel op. 
 3. Orden de verkregen **concentraties** van groot naar klein. 
 
-
-### Uitdaging:
+Uitdaging:
 Herhaal deze stappen voor alle circa 350.000 adressen. 
 
 # Hoe werkt het algoritme? 
 
-## Voorbeeld
+Voorbeeld:
 Concentratierisico voor Grote Markt 1, Groningen. 
 
 
@@ -84,9 +90,6 @@ p1
 
 ```
 
-
-
-## Voorbeeld
 Welke adressen liggen binnen een straal van 200 meter? 
 
 ```{r}
@@ -138,7 +141,6 @@ c(zuid_lat, noord_lat, west_lon, oost_lon)
 
 ```
 
-## Aanpak 2
 Blok van 400 x 400 meter om Grote Markt 1.
 
 ```{r}
@@ -152,7 +154,6 @@ p3 <- p2 %>%
 p3
 ```
 
-## Aanpak 2
 Blok van 400 x 400 meter om Grote Markt 1.
 
 ```{r}
@@ -167,7 +168,6 @@ p4
 ```
 
 
-## Aanpak 2
 Pas Haversine formule alleen toe op adressen in het blok. 
 
 ```{r}
@@ -190,7 +190,7 @@ p4 <- p1 %>%
 p4
 ```
 
-## Aanpak 2
+
 Pas Haversine formule alleen toe op adressen in het blok. 
 
 ```{r}
@@ -216,7 +216,7 @@ p5
 ```
 
 
-## Aanpak 2
+
 Pas Haversine formule alleen toe op adressen in het blok. 
 
 ```{r}
@@ -228,7 +228,7 @@ p6 <- p5 %>%
 p6
 ```
 
-## Aanpak 2
+
 Sommeer de verzekerde sommen van de adressen in de cirkel. 
 
 ```{r}
@@ -245,17 +245,14 @@ p6 <- p5 %>%
 p6
 ```
 
-## Samengevat
+# Samengevat
 1. Maak een blok van 400 x 400 meter rond Grote Markt 1
 2. Pas Haversine formule toe op de adressen in het blok
 3. Sommeer verzekerde sommen van de adressen binnen een straal van 200m
 4. Herhaal deze stappen voor alle circa 350.000 adressen in AAS-portefeuille
 
 
-
-
 # RShiny Concentration risk tool
-
 
 ```{r}
 
