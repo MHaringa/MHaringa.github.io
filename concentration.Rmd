@@ -39,8 +39,6 @@ EIOPA schrijft voor:
 
 Achtergrond:
 - Bestand tegen catastrofes.
-- Tot halverwege 2017 het enige risico dat we niet konden meten. 
-- Nu meten we ook concentratierisico zoals voorgeschreven.
 
 
 ## Hoe meten we concentratierisico? 
@@ -51,7 +49,7 @@ Stappen:
 3. Orden de verkregen **concentraties** van groot naar klein. 
 
 Uitdaging:
-Herhaal deze stappen voor alle circa 350.000 adressen. 
+Herhaal deze stappen voor alle adressen. 
 
 # Hoe werkt het algoritme? 
 
@@ -249,113 +247,12 @@ p6
 1. Maak een blok van 400 x 400 meter rond Grote Markt 1
 2. Pas Haversine formule toe op de adressen in het blok
 3. Sommeer verzekerde sommen van de adressen binnen een straal van 200m
-4. Herhaal deze stappen voor alle circa 350.000 adressen in AAS-portefeuille
+4. Herhaal deze stappen voor alle adressen 
 
 
-# RShiny Concentration risk tool
-
-```{r}
-
-shinyApp(
-
-ui = navbarPage("Concentratierisicotool", id="nav", windowTitle = "Concentratierisico", 
-
-  tabPanel("Interactieve kaart op adres",
-    div(class="outer",
-
-      tags$head(
-        includeCSS("css/styles2.css")
-      ),
-
-      leafletOutput("map", width="100%", height="100%"),
-    
-      absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-        draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-        width = 330, height = "auto",
-        br(),
-        textInput("text1", label = "Postcode (bijv. 9712HN):"),
-        textInput("text2", label = "Huisnummer (bijv. 1):"),
-        textInput("text3", label = "Huisletter:"),
-        textInput("text4", label = "Huisnummertoevoeging:"),
-        hr(),
-        p("De rode cirkel om het gekozen adres geeft een straal van 200 meter aan."),
-        hr(),
-        h5(textOutput("text9"))
-      )
-    ))), 
-
-server =  function(input, output, session){ ## Interactive Map ###########################################
-
-  # Create the map
-  output$map <- renderLeaflet({
-    postcode1 <- toupper(gsub(" ", "", input$text1)) 
-    huisnummer0 <- input$text2
-    coords <- spatialrisk::Groningen %>% 
-              filter(postal_code == postcode1) %>% 
-              select(lon, lat) %>% 
-              slice(1) %>% 
-              as.numeric(.)
-    
-    if (postcode1 %in% Groningen$postal_code) 
-        leaflet() %>%
-          addTiles() %>%
-          setView(lng = coords[1], lat = coords[2], zoom = 16) 
-    else{
-        leaflet() %>%
-          addTiles() %>%
-          setView(lng = 5, lat = 52, zoom = 8)
-      } 
-    })
-  
-  
-  observe({
-    postcode1 <- toupper(gsub(" ", "", input$text1)) 
-    huisnummer0 <- input$text2
-    coords <- spatialrisk::Groningen %>% 
-              filter(postal_code == postcode1) %>% 
-              select(lon, lat) %>% 
-              slice(1) %>% 
-              as.numeric(.)
-    
-    block <- spatialrisk::block_around_point(lon = coords[[1]], lat = coords[[2]])
-    
-    data <- spatialrisk::Groningen %>% sample_n(2000)
-    
-    data_sub <- data[data$lon > block[3] &
-                   data$lon < block[4] &
-                   data$lat > block[1] &
-                   data$lat < block[2], ]
-    
-    uitkomst <- sum(data_sub$amount, na.rm = TRUE)
-    
-    output$text9 <- renderText({paste("De concentratie (straal 200 meter) op dit adres bedraagt:", uitkomst, "euro.")}) 
-    
-    set.seed(2)
-    df <- Groningen %>%
-      sample_n(2000) #%>%
-      #points_in_circle(., coords[1], coords[2], radius = 330)
-    
-    leafletProxy("map") %>% 
-      clearShapes() %>%
-      addCircles(lng = coords[1], lat = coords[2], stroke = FALSE,
-                 radius = 200, color = "red", fillOpacity = .2) %>%
-      addAwesomeMarkers(data = df, lng = ~lon, lat = ~lat, icon = icons_fn("ion-ios-home-outline", "orange"), 
-                         popup = ~paste0(strong("Plaats: "), city, br(), strong("Verzekerde som: "), amount, " euro",  
-                                       br(), strong("Postcode: "), postal_code, br(), strong("Huisnummer: "), 
-                                       number, br(), strong("Huisletter: "), letter, br(), strong("Huisnrtoev: "), 
-                                       suffix, br(), strong("Straat: "), street)) %>%
-      addAwesomeMarkers(lng = coords[1], lat = coords[2], 
-                        icon = icons_fn("ion-ios-star", "red")) 
-    })
-}
-)
-
-```
 
 
-```{r, include = FALSE, eval = FALSE}
-knitr::include_app("https://martinharinga.shinyapps.io/PCtool/")
-```
+
 
 
 
