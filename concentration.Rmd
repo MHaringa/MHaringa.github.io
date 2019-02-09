@@ -13,10 +13,9 @@ The goal of this project is to determine the coördinates (long/lat) in the Neth
 
 The calculations given below are summarized in the R-package spatialrisk. spatialrisk is an R-package for spatial risk calculations. In particular, it can be used to determine concentration risk. The package is currently work-in-progress and contributions are welcome.
 
-The quickest way to get the development version of the package running locally is using devtools:
 
 ```{r, warning = FALSE, eval = FALSE, message = FALSE}
-devtools::install_github(repo = "MHaringa/spatialrisk")
+#install.packages("spatialrisk)
 library(spatialrisk)
 ```
 
@@ -27,7 +26,6 @@ library(shiny)
 library(leaflet)
 library(data.table)
 library(spatialrisk)
-#devtools::install_github(repo = "MHaringa/spatialrisk")
 
 ```
 
@@ -66,7 +64,7 @@ df <- Groningen %>%
   sample_n(2000) %>%
   points_in_circle(., centrum[1], centrum[2], radius = 530)
 
-blok <- block_around_point(centrum[1], centrum[2], radius = 200)
+#blok <- block_around_point(centrum[1], centrum[2], radius = 200)
 
 icons_fn <- function(icoon, kleur){
   awesomeIcons(
@@ -143,18 +141,18 @@ Blok van 400 x 400 meter om Grote Markt 1.
 
 ```{r}
 
-p3 <- p2 %>%
-  addAwesomeMarkers(lng = blok[4], lat = centrum[2], icon = icons_fn("ion-arrow-right-c", "blue")) %>%
-  addAwesomeMarkers(lng = blok[3], lat = centrum[2], icon = icons_fn("ion-arrow-left-c", "blue")) %>%
-  addAwesomeMarkers(lng = centrum[1], lat = blok[1], icon = icons_fn("ion-arrow-down-c", "blue")) %>%
-  addAwesomeMarkers(lng = centrum[1], lat = blok[2], icon = icons_fn("ion-arrow-up-c", "blue")) 
+#p3 <- p2 %>%
+#  addAwesomeMarkers(lng = blok[4], lat = centrum[2], icon = icons_fn("ion-arrow-right-c", "blue")) %>%
+#  addAwesomeMarkers(lng = blok[3], lat = centrum[2], icon = icons_fn("ion-arrow-left-c", "blue")) %>%
+#  addAwesomeMarkers(lng = centrum[1], lat = blok[1], icon = icons_fn("ion-arrow-down-c", "blue")) %>%
+#  addAwesomeMarkers(lng = centrum[1], lat = blok[2], icon = icons_fn("ion-arrow-up-c", "blue")) 
 
-p3
+#p3
 ```
 
 Blok van 400 x 400 meter om Grote Markt 1.
 
-```{r}
+```{r, eval = FALSE}
 p4 <- p3 %>%
   addRectangles(
     lng1=blok[3], lat1=blok[1],
@@ -168,9 +166,9 @@ p4
 
 Pas Haversine formule alleen toe op adressen in het blok. 
 
-```{r}
+```{r, eval = FALSE}
 data_binnen_blok <- df[df$lon > blok[3] &
-                       df$lon < blok[4] &
+                      df$lon < blok[4] &
                        df$lat > blok[1] &
                        df$lat < blok[2], ]
 
@@ -191,7 +189,7 @@ p4
 
 Pas Haversine formule alleen toe op adressen in het blok. 
 
-```{r}
+```{r, eval = FALSE}
 
 data_binnen_cirkel <- df %>% filter(distance < 200)
 data_buiten_cirkel <- setdiff(df, data_binnen_cirkel)
@@ -217,7 +215,7 @@ p5
 
 Pas Haversine formule alleen toe op adressen in het blok. 
 
-```{r}
+```{r, eval = FALSE}
 p6 <- p5 %>%
   addCircles(lng = 6.568865, lat = 53.21828, stroke = FALSE,
     radius = 200, color = "red", fillOpacity = .2
@@ -229,7 +227,7 @@ p6
 
 Sommeer de verzekerde sommen van de adressen in de cirkel. 
 
-```{r}
+```{r, eval = FALSE}
 
 concentratie_som <- sum(data_binnen_cirkel$amount)
 
