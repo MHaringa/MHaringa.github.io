@@ -1,5 +1,5 @@
 ---
-title: "Project 2: Master's thesis"
+title: "Construction of Insurance Tariff Classes"
 output:
   html_document:
     toc: true
@@ -9,6 +9,8 @@ output:
 ---
 
 The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. 
+
+
 
 
 
