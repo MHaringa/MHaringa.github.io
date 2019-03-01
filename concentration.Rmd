@@ -8,7 +8,7 @@ output:
     number_sections: false
 ---
 
-A recently European Commission regulation requires insurance companies to determine the maximum value of insured fire risk policies of all buildings that are partly or fully located within circle of a radius of 200m. In this post I plan to focus the discussion on spatial risk, and then specifically concentration risk in the context of Solvency II (the EU insurance regultation framework). This post starts off by discussing concentration risk in the context of Solvency II, and how insurers could benefit from my R-package `spatialrisk` (see https://CRAN.R-project.org/package=spatialrisk), and then narrows in to focus on the application of the R-package on actuarial work. 
+A recently European Commission regulation requires insurance companies to determine the maximum value of insured fire risk policies of all buildings that are partly or fully located within circle of a radius of 200m. In this post I plan to focus the discussion on spatial risk, and then specifically concentration risk in the context of Solvency II (the EU insurance regultation framework). This post starts off by discussing concentration risk in the context of Solvency II, and how insurers could benefit from my R-package `spatialrisk` (see [here]( https://CRAN.R-project.org/package=spatialrisk)), and then narrows in to focus on the application of the R-package on actuarial work. 
 
 # Introduction
 
@@ -26,215 +26,36 @@ the capital requirement for fire risk (as fire and explosion) that should "(...)
 This problem can be stated as: "find the centre coordinates of a circle with a fixed radius that maximizes the coverage of total fire risk insured". This problem can be viewed as a particular instance of the Maximal Covering Location Problem (MCLP) with fixed radius. This meta-heuristic method allows the circle centre as being to be placed in any point of the plane, while the algorithm in the `spatialrisk` package assumes the circle centre as being one of the building. The computational performance of the `spatialrisk` package is investigated to overcome the long times the MCLP algorithm is taking. The algorithm is written in C++. The algorithm needs about 5 minutes to calculate the risk insured for 500,000 buildings. 
 
 
-# How do we measure concentration risk?
+# spatialrisk
 
+The package offers an effective approach to calculate the *standard formula* under Solvency II. The *standard formula* under Solvency II asks companies to report their largest fire concentration in respect of the fire peril within a radius of 200m. This is the maximum gross sum insured of the set of buildings fully or partly located within this radius. 
 
-```{r, warning = FALSE, eval = FALSE, message = FALSE}
-#install.packages("spatialrisk)
+You can install spatialrisk from github with:
+  
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("MHaringa/spatialrisk")
+```
+
+## Example 1
+Find all observations in dataframe `Groningen` within radius of 50m from center point *(lon,lat) = (6.561561,53.21326)*:
+  
+```{r example}
 library(spatialrisk)
+points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius = 50)
 ```
 
-```{r, warning = FALSE, include = FALSE, message = FALSE}
-library(ggmap)
-library(dplyr) 
-library(shiny)
-library(leaflet)
-library(data.table)
-library(spatialrisk)
-
-```
-
-
-# Hoe werkt het algoritme? 
-
-Voorbeeld:
-Concentratierisico voor Grote Markt 1, Groningen. 
-
-
-```{r}
-
-centrum <- c(6.568865, 53.21828)
-
-set.seed(2)
-df <- Groningen %>% 
-  sample_n(2000) %>%
-  points_in_circle(., centrum[1], centrum[2], radius = 530)
-
-#blok <- block_around_point(centrum[1], centrum[2], radius = 200)
-
-icons_fn <- function(icoon, kleur){
-  awesomeIcons(
-    icon = icoon,
-    iconColor = 'black',
-    library = 'ion',
-    markerColor = kleur
-    )
-}
+## Example 2
+Find for each row in dataframe `df` the observations in dataframe `Groningen` within radius of 100m from lon/lat pair. Then the function takes for the obtained observations the sum of the column `amount`: 
+  
+```{r example2}
+df <- data.frame(location = c("p1", "p2"), 
+                 lon = c(6.561561, 6.561398), 
+                 lat = c(53.21369, 53.21326))
+concentration(df, Groningen, value = amount, radius = 100)
 ```
 
 
-```{r}
-p1 <- leaflet(df, width = "100%") %>%
-  addTiles() %>%  # Add default OpenStreetMap map tiles
-  addAwesomeMarkers(lng = centrum[1], lat = centrum[2], icon = icons_fn("ion-ios-star", "red"), popup = "Grote Markt 1, Groningen") 
-
-p1
-
-```
-
-Welke adressen liggen binnen een straal van 200 meter? 
-
-```{r}
-
-p2 <- p1 %>%
-  addAwesomeMarkers(lng = ~lon, lat = ~lat, icon = icons_fn("ion-ios-home-outline", "orange"))
-
-p2
-```
-
-
-# Haversine formule
-De Haversine ('half-versed-sine') formule bepaalt de kortste afstand tussen twee punten op een globe. 
-
-```{r, echo = TRUE}
-lat_from <- 53.24007; lon_from <- 6.520386; lat_to <- 53.24054; lon_to <- 6.520386
-
-toRad <- pi/180 # Naar radialen
-lat_to <- lat_to * toRad; lat_from <- lat_from * toRad
-lon_to <- lon_to * toRad; lon_from <- lon_from * toRad
-dLat <- (lat_to - lat_from); dLon <- (lon_to - lon_from)
-
-a <- (sin(dLat/2)^2) + (cos(lat_from) * cos(lat_to)) * (sin(dLon/2)^2)
-2 * atan2(sqrt(a), sqrt(1 - a)) * 6378137 # Radius globe 
-```
-
-
-
-Pas Haversine formule toe op een deel van de adressen. Blok om Grote Markt 1? 
-
-```{r, echo = TRUE}
-lat_center <- 53.24007; lon_center <- 6.520386; radius <- 200; omtrek_aarde <- 40075000 
-
-one_lat_in_meters <- omtrek_aarde / 360
-one_lon_in_meters <- omtrek_aarde * cos(lat_center * pi / 180) / 360
-
-zuid_lat <- lat_center - radius / one_lat_in_meters
-noord_lat <- lat_center + radius / one_lat_in_meters
-west_lon <- lon_center - radius / one_lon_in_meters
-oost_lon <- lon_center + radius / one_lon_in_meters
-c(zuid_lat, noord_lat, west_lon, oost_lon) 
-
-```
-
-Blok van 400 x 400 meter om Grote Markt 1.
-
-```{r}
-
-#p3 <- p2 %>%
-#  addAwesomeMarkers(lng = blok[4], lat = centrum[2], icon = icons_fn("ion-arrow-right-c", "blue")) %>%
-#  addAwesomeMarkers(lng = blok[3], lat = centrum[2], icon = icons_fn("ion-arrow-left-c", "blue")) %>%
-#  addAwesomeMarkers(lng = centrum[1], lat = blok[1], icon = icons_fn("ion-arrow-down-c", "blue")) %>%
-#  addAwesomeMarkers(lng = centrum[1], lat = blok[2], icon = icons_fn("ion-arrow-up-c", "blue")) 
-
-#p3
-```
-
-Blok van 400 x 400 meter om Grote Markt 1.
-
-```{r, eval = FALSE}
-p4 <- p3 %>%
-  addRectangles(
-    lng1=blok[3], lat1=blok[1],
-    lng2=blok[4], lat2=blok[2],
-    fillColor = "transparent"
-  )
-
-p4
-```
-
-
-Pas Haversine formule alleen toe op adressen in het blok. 
-
-```{r, eval = FALSE}
-data_binnen_blok <- df[df$lon > blok[3] &
-                      df$lon < blok[4] &
-                       df$lat > blok[1] &
-                       df$lat < blok[2], ]
-
-data_buiten_blok <- setdiff(df, data_binnen_blok)
-
-p4 <- p1 %>%
-  addRectangles(
-    lng1 = blok[3], lat1 = blok[1],
-    lng2 = blok[4], lat2 = blok[2],
-    fillColor = "transparent"
-  ) %>%
-  addAwesomeMarkers(data = data_buiten_blok, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "lightgray")) %>%
-  addAwesomeMarkers(data = data_binnen_blok, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "orange"))
-
-p4
-```
-
-
-Pas Haversine formule alleen toe op adressen in het blok. 
-
-```{r, eval = FALSE}
-
-data_binnen_cirkel <- df %>% filter(distance < 200)
-data_buiten_cirkel <- setdiff(df, data_binnen_cirkel)
-
-p5 <- p1 %>%
-  addRectangles(
-    lng1 = blok[3], lat1 = blok[1],
-    lng2 = blok[4], lat2 = blok[2],
-    fillColor = "transparent"
-  ) %>%
-  addAwesomeMarkers(data = data_buiten_cirkel, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "lightgray")) %>%
-  addAwesomeMarkers(data = data_binnen_cirkel, ~lon, ~lat,  icon = icons_fn("ion-ios-home-outline", "orange"), 
-                                           popup = ~paste0(strong("Plaats: "), city, br(), strong("Verzekerde som: "), amount, " euro",  
-                                       br(), strong("Postcode: "), postal_code, br(), strong("Huisnummer: "), 
-                                       number, br(), strong("Huisletter: "), letter, br(), strong("Huisnrtoev: "), 
-                                       suffix, br(), strong("Straat: "), street, br(), strong("Afstand: "), 
-                                       round(distance, 1), " meter"))
-p5
-
-```
-
-
-
-Pas Haversine formule alleen toe op adressen in het blok. 
-
-```{r, eval = FALSE}
-p6 <- p5 %>%
-  addCircles(lng = 6.568865, lat = 53.21828, stroke = FALSE,
-    radius = 200, color = "red", fillOpacity = .2
-  )
-
-p6
-```
-
-
-Sommeer de verzekerde sommen van de adressen in de cirkel. 
-
-```{r, eval = FALSE}
-
-concentratie_som <- sum(data_binnen_cirkel$amount)
-
-p6 <- p5 %>%
-  addCircles(lng = 6.568865, lat = 53.21828, stroke = FALSE,
-    radius = 200, color = "red", fillOpacity = .2) %>%
-    addAwesomeMarkers(lng = centrum[1], lat = centrum[2], icon = icons_fn("ion-ios-star", "red"), 
-                      label = ~paste0("Concentration: ", concentratie_som, " Euro"), 
-                      labelOptions = labelOptions(noHide = T),
-                      options = popupOptions(keepInView = TRUE))
-p6
-```
-
-# Samengevat
-1. Maak een blok van 400 x 400 meter rond Grote Markt 1
-2. Pas Haversine formule toe op de adressen in het blok
-3. Sommeer verzekerde sommen van de adressen binnen een straal van 200m
-4. Herhaal deze stappen voor alle adressen 
 
 
 
