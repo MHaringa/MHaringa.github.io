@@ -62,3 +62,22 @@ The last part is to fit a *generalized linear model*. The function rating_factor
 model <- glm(nclaims ~ age_policyholder_class, offset = log(exposure), family = "poisson", data = dat)
 rating_factors(model)
 ```
+
+
+# Thesis
+
+<!--html_preserve-->
+
+<div class="band full">
+  <div class="bandContent gallerySection">
+    <div class="galleryIntro">Thesis.</div>
+    <div class="galleryItems">
+      <div class="galleryItem">
+        <a href="https://github.com/svmiller/svm-r-markdown-templates/blob/master/svm-rmarkdown-article-example.pdf"><img class="galleryItemImage" src="images/pdf.png"/></a>
+        <a href="https://github.com/svmiller/svm-r-markdown-templates/blob/master/svm-rmarkdown-article-example.pdf" class="galleryItemLabel">Master's Thesis</a>
+        <div class="galleryItemDescription">Small-Area Statistical Analyses of Claim Frequency in Motor Insurance.
+      </div>
+    </div>
+  </div>
+  
+<!--/html_preserve-->
