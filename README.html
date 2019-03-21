@@ -22,7 +22,7 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<meta name="description" content="Turn your analyses into high quality documents, reports, presentations and dashboards with R Markdown. Use a productive notebook interface to weave together narrative text and code to produce elegantly formatted output. Use multiple languages including R, Python, and SQL. R Markdown supports a reproducible workflow for dozens of static and dynamic output formats including HTML, PDF, MS Word, Beamer, HTML5 slides, Tufte-style handouts, books, dashboards, shiny applications, scientific articles, websites, and more." />
+<meta name="description" content="Welcome to website and blog of Martin Haringa." />
 
 <link rel="icon" type="image/png" href="images/favicon.png" />
 
@@ -84,9 +84,7 @@ h6 {
 
 <link rel="stylesheet" href="css/rmarkdown.css" type="text/css" />
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -111,22 +109,92 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
 });
 </script>
 
 <!-- code folding -->
 
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -142,9 +210,9 @@ $(document).ready(function () {
           <div id="menuToggler"></div>
             <div id="menuItems">
               <a class="menuItem" href="index.html">Home</a>
-                <a class="menuItem" href="concentration.html">Project 1: Concentration risk</a>
-                  <a class="menuItem" href="thesis.html">Project 2: Master's thesis</a>
-                  <a class="menuItem" href="blog1.html">Blog</a>
+                <a class="menuItem" href="concentration.html">Maximum Fire Risk Insured</a>
+                  <a class="menuItem" href="thesis.html">Construction of Insurance Tariff Classes</a>
+                  <a class="menuItem" href="choropleth.html">Choropleth maps in R</a>
                   <a class="menuItem" href="aboutme.html">About me</a>
                     <a class="menuItem" href="contact.html">Contact me</a>
                       <a class="menuItem gitHub" href="https://github.com/mharinga"></a>
@@ -187,7 +255,7 @@ $(document).ready(function () {
 
 <div id="rStudioFooter" class="band full">
 <div class="bandContent">
-  <div id="copyright">© Copyright 2017 RStudio inc.</div>
+  <div id="copyright">© Copyright 2018 RStudio inc.</div>
   <div id="logos">
     <a href="https://github.com/MHaringa" class="footerLogo gitHub"></a>
     <a href="https://www.linkedin.com/in/martin-haringa-71a7a61b" class="footerLogo linkedIn"></a>

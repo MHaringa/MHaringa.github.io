@@ -68,7 +68,7 @@ The second part adds the constructed tariff classes for the variable *age_policy
 dat <- MTPL %>%
   mutate(age_policyholder_class = x$tariff_classes) %>%
   mutate_if(is.character, as.factor) %>%
-  mutate_if(is.factor, funs(biggest_reference(., exposure)))
+  mutate_if(is.factor, list(~biggest_reference(., exposure)))
 str(dat)
 ```
 

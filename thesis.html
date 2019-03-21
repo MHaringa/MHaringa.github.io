@@ -87,9 +87,7 @@ h6 {
 
 <link rel="stylesheet" href="css/rmarkdown.css" type="text/css" />
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -120,8 +118,6 @@ summary {
 </style>
 
 
-
-<div class="container-fluid main-container">
 
 <!-- tabsets -->
 
@@ -286,6 +282,16 @@ div.tocify {
 
 </style>
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
 <div class="col-xs-12 col-sm-4 col-md-3">
@@ -311,6 +317,7 @@ div.tocify {
               <a class="menuItem" href="index.html">Home</a>
                 <a class="menuItem" href="concentration.html">Maximum Fire Risk Insured</a>
                   <a class="menuItem" href="thesis.html">Construction of Insurance Tariff Classes</a>
+                  <a class="menuItem" href="choropleth.html">Choropleth maps in R</a>
                   <a class="menuItem" href="aboutme.html">About me</a>
                     <a class="menuItem" href="contact.html">Contact me</a>
                       <a class="menuItem gitHub" href="https://github.com/mharinga"></a>
@@ -386,7 +393,7 @@ x &lt;- construct_tariff_classes(data = MTPL, nclaims = nclaims, x = age_policyh
 <pre class="r"><code>dat &lt;- MTPL %&gt;%
   mutate(age_policyholder_class = x$tariff_classes) %&gt;%
   mutate_if(is.character, as.factor) %&gt;%
-  mutate_if(is.factor, funs(biggest_reference(., exposure)))
+  mutate_if(is.factor, list(~biggest_reference(., exposure)))
 str(dat)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    32731 obs. of  5 variables:
 ##  $ age_policyholder      : int  43 21 54 44 20 38 68 45 76 30 ...
@@ -413,7 +420,7 @@ rating_factors(model)</code></pre>
 
 <div id="rStudioFooter" class="band full">
 <div class="bandContent">
-  <div id="copyright">© Copyright 2017 RStudio inc.</div>
+  <div id="copyright">© Copyright 2018 RStudio inc.</div>
   <div id="logos">
     <a href="https://github.com/MHaringa" class="footerLogo gitHub"></a>
     <a href="https://www.linkedin.com/in/martin-haringa-71a7a61b" class="footerLogo linkedIn"></a>
