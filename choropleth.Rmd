@@ -1,0 +1,136 @@
+---
+title: "Choropleth maps in R"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+---
+
+The goal of this post is to show how to create choropleths of the Netherlands in R. Typically in R it is difficult to create choropleths. The functions presented here attempt to elegantly solve this problem. There are many ways to achieve a choropleth map in R. 
+
+# Elegant way
+The general idea is to convert both the point data and polygon data to spatial objects. After that, count how many points fall within that polygon. I know we can do this using the sp package, which is widespread and well-known in the R community, but I decided to use the sf package because sf would be the next generation standard of spatial objects in R (https://cran.r-project.org/web/packages/sf/index.html). Knowing the usage and functionality of `sf` will probably be beneficial.
+
+The first step is to read the shapefile of the Netherlands on the municipality level. A quick benchmark shows that the sf package does read much, much more quickly compared to the common used `rgdal::readOGR` function. 
+
+```{r, message = FALSE, warning = FALSE}
+library(sf)
+library(rgdal)
+library(dplyr)
+
+system.time(nl_gemeente_read <- st_read("data/nl_gemeente_2018/nl_gemeente_2018.shp", 
+                                        quiet = TRUE))
+
+system.time(ogr_read <- readOGR(dsn = "data/nl_gemeente_2018/nl_gemeente_2018.shp", 
+                                layer = "nl_gemeente_2018", 
+                                verbose = FALSE))
+
+```
+
+Convert coordinates of the simple feature to WGS84. The second line makes invaled geometries valid. This can also be done using `lwgeom::st_make_valid(x)`. 
+
+```{r}
+nl_gemeente_wgs84 <- nl_gemeente_read %>%
+  st_buffer(0) %>% # Make invalid geometries valid
+  st_transform(crs = 4326) %>% # Convert coordinates to WGS84
+  mutate(id = 1:nrow(.)) # Add column with id
+```
+
+This example uses insurance data. The data shows the sum insured for 20,000 postal codes in the Netherlands. The goal is to aggregate this sums on the municipality level. The municipalities in the choropleth map are shaded according to how many data points fall within the boundaries of the region. 
+
+```{r}
+insurance <- readRDS("data/insurance.rds") 
+insurance
+```
+
+Convert points to a simple feature object. Note that the argument `crs` (coordinate reference system) should be the same EPSG code as above. 
+
+```{r}
+insurance_sf <- st_as_sf(insurance, coords = c("lon", "lat"), crs = 4326) 
+```
+
+In the next step we merge the simple feature objects. The function `sf::st_join` can be used to do a spatial left or inner join. 
+
+```{r}
+insurance_map_sf <- nl_gemeente_wgs84 %>% st_join(., insurance_sf) 
+insurance_map_sf
+```
+
+Note the message `although coordinates are longitude/latitude, st_intersects assumes that they are planar`. Depending where you are on the globe, and the distance between points forming a line or polygon, an apparently straight line in geographical coordinates will be more or less curved when projected to the plane, but for our use case (small area not near the poles) the message is of little importance. 
+
+Next the object should be aggregated on the id column. Note that the easiest would be to use the group_by and summarize statements direct to the above object. It turns out that this approach takes hours (see issue: https://github.com/r-spatial/sf/issues/661). The following shows a fast workaround:
+
+```{r}
+
+insurance_map <- insurance_map_sf
+st_geometry(insurance_map) <- NULL
+
+insurance_map_sf2 <- insurance_map %>%
+  group_by(id) %>% 
+  summarize(output = sum(amount)) %>% 
+  ungroup() %>%
+  left_join(., nl_gemeente_wgs84) %>%
+  st_as_sf(., crs = 4326) 
+
+```
+
+# Printing choropleths
+
+## Using ggplot2
+
+The geom_sf function is used to visualise simple feature (sf) objects. 
+
+```{r, warning = FALSE, message = FALSE}
+
+library(ggplot2)
+library(insurancerating)
+library(viridis)
+
+insurance_map_sf2_cut <- insurance_map_sf2 %>%
+  mutate(output_cut = insurancerating::fisher(output / 1e6, n = 7)) 
+
+ggplot(insurance_map_sf2_cut) + 
+  geom_sf(size = .1, color = "grey85") + 
+  geom_sf(data = insurance_map_sf2_cut, aes(fill = output_cut), size = .1, color = "grey85")  + 
+  coord_sf(datum = NA) + # Remove grid
+  scale_fill_viridis_d() +
+  theme_void() +
+  labs(fill = "Sum insured (x 1 mln EUR)")
+```
+
+## Using tmap
+The following code shows another package for mapping simple feature object. Tmap is my favourite for making maps. The syntax is similar to ggplot2.
+
+```{r, warning = FALSE, message = FALSE}
+library(tmap)
+
+tm_shape(insurance_map_sf2) +
+  tm_polygons("output", 
+              id = "gemeentena", 
+              palette = "viridis", 
+              style = "fisher", 
+              title = "Insurance (in euros)", 
+              border.col = "white", 
+              lwd = .1) +
+  tm_compass(position = c("right", "bottom")) +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_style("gray")
+
+```
+
+In html:
+```{r}
+library(stringi)
+insurance_map_sf2$gemeentena <- stringi::stri_encode(insurance_map_sf2$gemeentena, "", "UTF-8")
+
+tmap_mode("view")
+tm_shape(insurance_map_sf2) +
+  tm_polygons("output", 
+              id = "gemeentena", 
+              palette = "viridis", 
+              style = "fisher", 
+              title = "Insurance (in euros)")
+```
+
