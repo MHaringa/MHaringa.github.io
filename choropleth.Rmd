@@ -8,12 +8,18 @@ output:
     number_sections: false
 ---
 
-The goal of this post is to show how to create choropleths of the Netherlands in R. Typically in R it is difficult to create choropleths. The functions presented here attempt to elegantly solve this problem. There are many ways to achieve a choropleth map in R. 
+The goal of this post is to show how to create choropleths of the Netherlands in R. Typically in R it is difficult to create choropleths. One main problem is on merging the names in the shapefile with the names used in the data set. For example, in case of municipality names in the Netherlands it is common that due to municipal reorganizations or due to punctuation marks in municipality names it is not easy to merge the municipality names in the shapefile with the names in the data set. To elegantly solve this problem the choropleth maps are not shaded based on a value for a region but directly on the points within that region. The general idea is to convert both the point data and polygon data to spatial objects. After that, count how many points fall within that polygon. This method is illustrated by an insurance data set. The insurance data set contains of 20,000 postal codes with a sum insured and given coordinates. The goal is to shade a choropleth map with the total sum insured per municipality. 
 
-# Elegant way
-The general idea is to convert both the point data and polygon data to spatial objects. After that, count how many points fall within that polygon. I know we can do this using the sp package, which is widespread and well-known in the R community, but I decided to use the sf package because sf would be the next generation standard of spatial objects in R (https://cran.r-project.org/web/packages/sf/index.html). Knowing the usage and functionality of `sf` will probably be beneficial.
+The above is possible using the `sp` package, which is widespread and well-known in the R community, but I decided to use the `sf` package because `sf` would be the next generation standard of spatial objects in R (https://cran.r-project.org/web/packages/sf/index.html). It implements a formal standard called "Simple Features" ([see Wikipedia](https://en.wikipedia.org/wiki/Simple_Features)) that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. This standard has been adopted widely, not only by spatial databases such as PostGIS, but also more recent standards such as GeoJSON. Knowing the usage and functionality of `sf` will probably be beneficial. 
 
-The first step is to read the shapefile of the Netherlands on the municipality level. A quick benchmark shows that the sf package does read much, much more quickly compared to the common used `rgdal::readOGR` function. 
+
+
+
+# Reading a shapefile 
+The first step is to read the shapefile of the Netherlands on the municipality level. There are different ways one can load a shapefile into R. 
+A quick benchmark shows the function `st_read()` from `sf` does read much, much more quickly compared to the common used function `readOGR()` from `rgdal`. Note that shapefiles consist of more than one file, all with identical basename, which reside in the same directory. 
+
+The function `st_read()` from `sf` is used to load the shapefile.
 
 ```{r, message = FALSE, warning = FALSE}
 library(sf)
@@ -29,16 +35,33 @@ system.time(ogr_read <- readOGR(dsn = "data/nl_gemeente_2018/nl_gemeente_2018.sh
 
 ```
 
-Convert coordinates of the simple feature to WGS84. The second line makes invaled geometries valid. This can also be done using `lwgeom::st_make_valid(x)`. 
+Let's check the contents of this simple feature object. The short report printed gives the geometry type, mentions that there are 380 features (records, represented as rows) and 3 fields (attributes, represented as columns). Each row is a simple feature: a single record, or data.frame row, consisting of attributes and geometry. 
 
 ```{r}
+nl_gemeente_read
+```
+
+For each row a single simple feature geometry is given. The above printed output shows that geometries are printed in abbreviated form, but we can view a complete geometry by selecting it, e.g. the first one by:
+
+```{r}
+nl_gemeente_geom <- st_geometry(nl_gemeente_read)
+nl_gemeente_geom[[1]]
+```
+
+The way this is printed is called *well-known text*, and is part of the standards. The word MULTIPOLYGON is followed by three parenthesis, because it can consist of multiple polygons, in the form of MULTIPOLYGON(POL1,POL2), where POL1 might consist of an exterior ring and zero or more interior rings, as of (EXT1,HOLE1,HOLE2)
+
+Convert the coordinate reference system of the simple feature object from NA to WGS84. The second line makes invalid geometries valid. This can also be done using `lwgeom::st_make_valid(x)`. 
+
+```{r}
+
 nl_gemeente_wgs84 <- nl_gemeente_read %>%
   st_buffer(0) %>% # Make invalid geometries valid
   st_transform(crs = 4326) %>% # Convert coordinates to WGS84
-  mutate(id = 1:nrow(.)) # Add column with id
+  mutate(id = 1:nrow(.)) # Add column with id to each municipality
 ```
 
-This example uses insurance data. The data shows the sum insured for 20,000 postal codes in the Netherlands. The goal is to aggregate this sums on the municipality level. The municipalities in the choropleth map are shaded according to how many data points fall within the boundaries of the region. 
+# Reading insurance data
+This example uses insurance data. The data shows the sum insured for 20,000 postal codes in the Netherlands. The goal is to aggregate this sums on the municipality level. Therefore for each point in this data set we should find the corresponding polygon. The polygons are shaded according to the sum of the amounts within the boundaries of the polygon. 
 
 ```{r}
 insurance <- readRDS("data/insurance.rds") 
@@ -51,34 +74,41 @@ Convert points to a simple feature object. Note that the argument `crs` (coordin
 insurance_sf <- st_as_sf(insurance, coords = c("lon", "lat"), crs = 4326) 
 ```
 
-In the next step we merge the simple feature objects. The function `sf::st_join` can be used to do a spatial left or inner join. 
+# Merge sf objects
+In the next step we merge the simple feature objects. The function `sf::st_join` can be used to do a spatial left or inner join. See documentation ?st_join on how to carry out an inner join. 
 
 ```{r}
 insurance_map_sf <- nl_gemeente_wgs84 %>% st_join(., insurance_sf) 
 insurance_map_sf
+
 ```
 
 Note the message `although coordinates are longitude/latitude, st_intersects assumes that they are planar`. Depending where you are on the globe, and the distance between points forming a line or polygon, an apparently straight line in geographical coordinates will be more or less curved when projected to the plane, but for our use case (small area not near the poles) the message is of little importance. 
 
-Next the object should be aggregated on the id column. Note that the easiest would be to use the group_by and summarize statements direct to the above object. It turns out that this approach takes hours (see issue: https://github.com/r-spatial/sf/issues/661). The following shows a fast workaround:
+Next the object should be aggregated on the id column. Note that the easiest would be to use the group_by and summarize statements directly to the above `sf` object. It turns out that this approach takes hours (see issue: https://github.com/r-spatial/sf/issues/661). To overcome this it is better to perform the aggregation on a data.frame. This is done by transforming the data from an `sf` object to a data.frame (by removing geometries).
 
 ```{r}
 
+# Change from sf to data.frame 
 insurance_map <- insurance_map_sf
 st_geometry(insurance_map) <- NULL
 
+# Aggregate
 insurance_map_sf2 <- insurance_map %>%
   group_by(id) %>% 
   summarize(output = sum(amount)) %>% 
   ungroup() %>%
-  left_join(., nl_gemeente_wgs84) %>%
-  st_as_sf(., crs = 4326) 
+  left_join(nl_gemeente_wgs84, .) 
 
+class(insurance_map_sf2)
 ```
+
+Note that joins also work when a data frame is the first argument. This keeps the geometry column but drops the sf class, returning a data.frame object.
 
 # Printing choropleths
 
 ## Using ggplot2
+`ggplot2` is undoubedly the most popular package for producing choropleths in R, and very powerful. It is used for all sorts of plotting like the base graphics package, and unlike tmap is not designed solely for mapping. 
 
 The geom_sf function is used to visualise simple feature (sf) objects. 
 
@@ -92,8 +122,7 @@ insurance_map_sf2_cut <- insurance_map_sf2 %>%
   mutate(output_cut = insurancerating::fisher(output / 1e6, n = 7)) 
 
 ggplot(insurance_map_sf2_cut) + 
-  geom_sf(size = .1, color = "grey85") + 
-  geom_sf(data = insurance_map_sf2_cut, aes(fill = output_cut), size = .1, color = "grey85")  + 
+  geom_sf(aes(fill = output_cut), size = .1, color = "grey65")  + 
   coord_sf(datum = NA) + # Remove grid
   scale_fill_viridis_d() +
   theme_void() +
@@ -101,11 +130,12 @@ ggplot(insurance_map_sf2_cut) +
 ```
 
 ## Using tmap
-The following code shows another package for mapping simple feature object. Tmap is my favourite for making maps. The syntax is similar to ggplot2.
+The following code shows another package for mapping simple feature objects. `tmap` is my favourite for making maps (and also very underrated). It has similar syntax to the popular ggplot2 but will also produce a reasonable map with only a couple of lines of code. 
 
 ```{r, warning = FALSE, message = FALSE}
 library(tmap)
 
+tmap_mode("plot")
 tm_shape(insurance_map_sf2) +
   tm_polygons("output", 
               id = "gemeentena", 
@@ -120,7 +150,8 @@ tm_shape(insurance_map_sf2) +
 
 ```
 
-In html:
+It is easy to obtain the same map in html.  
+
 ```{r}
 library(stringi)
 insurance_map_sf2$gemeentena <- stringi::stri_encode(insurance_map_sf2$gemeentena, "", "UTF-8")
@@ -131,6 +162,71 @@ tm_shape(insurance_map_sf2) +
               id = "gemeentena", 
               palette = "viridis", 
               style = "fisher", 
-              title = "Insurance (in euros)")
+              title = "Insurance (in euros)", 
+              alpha = .5)
 ```
+
+
+# Data on shapefile level
+In many problems it is common to have the data already on the level of the polygons in the shapefile. For example it could be possible that the sum insured per postal code is known. The following example shows how to plot this data set on a choropleth map on the postal code level. 
+
+```{r, warning = FALSE, message = FALSE}
+
+nl_postcode_read <- st_read("data/nl_postcode4_2015/nl_postcode4_2015.shp", 
+                                        quiet = TRUE)
+
+pc_level <- insurance %>%
+  mutate(pc4txt = stringr::str_sub(postcode, 1, 4)) %>%
+  group_by(pc4txt) %>%
+  summarize(amount = sum(amount)) %>%
+  ungroup() %>%
+  left_join(nl_postcode_read, .)
+
+tmap_mode("view")
+tm_shape(pc_level) +
+  tm_polygons("amount", 
+              id = "pc4_naam", 
+              palette = "viridis", 
+              style = "fisher", 
+              title = "Insurance (in euros)", 
+              alpha = 0.5) 
+
+```
+
+# Create new polygons
+Note that approaching data from a small-area spatial perspective poses challenges. The way the municipalities are defined, such as their shapes and boundaries, is arbitrary and may be to large and undifferentiated to the spatial distribution of the sum insured. Therefore, municipalities may more properly be thought of as convenient ’bins’ into which the sums are gathered, rather than as objects of interest in themselves. It may be interesting to create choropleth maps at finer geographical resolutions. The following example shows how to create new polygons. The map shows a 'patchwork' pattern.
+
+
+```{r, message = FALSE, warning = FALSE}
+cent <- st_geometry(pc_level) %>% st_centroid %>% st_coordinates 
+
+blocks_level <- pc_level %>% 
+  mutate(area = as.numeric(st_area(.)), longitude = cent[,1], latitude = cent[,2]) %>%
+  group_by(cut(longitude,5), cut(latitude,5))  %>% 
+  summarise(area = sum(area), amount = sum(amount, na.rm = TRUE), dens = mean(amount/area)) %>%
+  ungroup() %>%
+  mutate(denscut = insurancerating::fisher(dens, n = 5)) %>%
+  filter(!is.na(denscut))
+
+ggplot(blocks_level) + 
+  geom_sf(aes(fill = denscut), size = .1, color = "grey65") + 
+  scale_fill_viridis_d() +
+  coord_sf(datum = NA) + # Remove grid
+  theme_void() +
+  labs(fill = "Ratio", 
+       title = "The sum insured divided by the area of the square.")
+```
+
+
+# Final Thoughts
+This has been a simple introduction to approaches for creating choropleth maps in R with code which users can easily adapt to their own projects. Don't worry if the code doesn't make sense, try and recreate the example or apply the existing code to your own data. Some final thoughts:
+
+- You can use R’s base graphics if you know how, but with the other packages out there you don't need to.
+- The choice of colour palette and the breaks are just as important as the package you use. The wrong choice will make any output look bad.
+- On the subject of colour, try experimenting with the viridis package - it's pretty cool!
+- `tmap` is a very underrated package and my personal choice if I want to quickly produce something. The syntax is not hard to pick up.
+- `ggplot2` is powerful, and popular for a reason. With a little know-how, it will always be a strong and flexible choice and understanding how it’s put together will allow you to do many other things in R besides choropleths.
+- Leaflet is fantastic and usually produces beautiful output. It is increasingly useful to be able to present your data online and with scope for the user to interact with it, though for hard-copy publishing it may not be worthwhile.
+- This introduction to choropleths is proof that there are many ways to achieve most goals in R. Try experimenting with each package and get a sense of what you find most comfortable. Consider the trade-off between the immediacy of mapping with packages such as GISTools, and the longer-term benefits of mastering a package with the power of ggplot2.
+
 
