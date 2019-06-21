@@ -265,8 +265,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -400,19 +398,21 @@ str(dat)</code></pre>
 ##  $ nclaims               : int  0 0 0 1 1 0 0 1 0 0 ...
 ##  $ exposure              : num  1 1 1 1 0.852 ...
 ##  $ amount                : num  0 0 0 57540 2057 ...
-##  $ age_policyholder_class: Factor w/ 7 levels &quot;(35,52]&quot;,&quot;[18,28]&quot;,..: 1 2 4 1 2 1 6 1 6 3 ...</code></pre>
+##  $ age_policyholder_class: Factor w/ 9 levels &quot;(39,50]&quot;,&quot;[18,25]&quot;,..: 1 2 5 1 2 4 7 1 8 3 ...</code></pre>
 <p>The last part is to fit a <em>generalized linear model</em>. The function rating_factors prints the output including the reference group.</p>
 <pre class="r"><code>model &lt;- glm(nclaims ~ age_policyholder_class, offset = log(exposure), family = &quot;poisson&quot;, data = dat)
 rating_factors(model)</code></pre>
-<pre><code>##                             term  estimate
-## 1                    (Intercept) 0.1377646
-## 2 age_policyholder_class (35,52] 1.0000000
-## 3 age_policyholder_class [18,28] 1.6929529
-## 4 age_policyholder_class (28,35] 1.1454731
-## 5 age_policyholder_class (52,59] 0.8315476
-## 6 age_policyholder_class (59,66] 0.7361614
-## 7 age_policyholder_class (66,82] 0.6918582
-## 8 age_policyholder_class (82,95] 0.8843903</code></pre>
+<pre><code>##                      term     cluster  estimate
+## 1               Intercept (Intercept) 0.1368181
+## 2  age_policyholder_class     (39,50] 1.0000000
+## 3  age_policyholder_class     [18,25] 1.9438228
+## 4  age_policyholder_class     (25,32] 1.3234995
+## 5  age_policyholder_class     (32,39] 1.0568538
+## 6  age_policyholder_class     (50,57] 0.8919696
+## 7  age_policyholder_class     (57,64] 0.7423998
+## 8  age_policyholder_class     (64,71] 0.7379362
+## 9  age_policyholder_class     (71,83] 0.7021348
+## 10 age_policyholder_class     (83,95] 0.6933378</code></pre>
 </div>
 
 </div> <!-- articleBandContent -->

@@ -275,8 +275,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -374,12 +372,12 @@ library(dplyr)
 system.time(nl_gemeente_read &lt;- st_read(&quot;data/nl_gemeente_2018/nl_gemeente_2018.shp&quot;, 
                                         quiet = TRUE))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.023   0.004   0.034</code></pre>
+##   0.019   0.004   0.027</code></pre>
 <pre class="r"><code>system.time(ogr_read &lt;- readOGR(dsn = &quot;data/nl_gemeente_2018/nl_gemeente_2018.shp&quot;, 
                                 layer = &quot;nl_gemeente_2018&quot;, 
                                 verbose = FALSE))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.435   0.012   0.479</code></pre>
+##   0.408   0.007   0.424</code></pre>
 <p>Let’s check the contents of this simple feature object. The short report printed gives the geometry type, mentions that there are 380 features (records, represented as rows) and 3 fields (attributes, represented as columns). Each row is a simple feature: a single record, or data.frame row, consisting of attributes and geometry.</p>
 <pre class="r"><code>nl_gemeente_read</code></pre>
 <pre><code>## Simple feature collection with 380 features and 3 fields

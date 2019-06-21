@@ -265,8 +265,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -367,18 +365,19 @@ devtools::install_github(&quot;MHaringa/spatialrisk&quot;)</code></pre>
 <div id="example-1" class="section level2">
 <h2>Example 1</h2>
 <p>Find all observations in dataframe <code>Groningen</code> within radius of 50m from center point <em>(lon,lat) = (6.561561,53.21326)</em>:</p>
-<pre class="r"><code>library(spatialrisk)
-points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius = 50)</code></pre>
-<pre><code>## # A tibble: 7 x 10
+<pre class="r"><code>library(spatialrisk)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;spatialrisk&#39;</code></pre>
+<pre><code>## The following object is masked _by_ &#39;.GlobalEnv&#39;:
+## 
+##     insurance</code></pre>
+<pre class="r"><code>points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius = 50)</code></pre>
+<pre><code>## # A tibble: 3 x 10
 ##   street number letter suffix postal_code city    lon   lat amount
 ##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
 ## 1 Heres…      5 &lt;NA&gt;   &lt;NA&gt;   9711EP      Gron…  6.57  53.2      5
 ## 2 Heres…      3 a      &lt;NA&gt;   9711EP      Gron…  6.57  53.2     36
-## 3 Heres…      7 &lt;NA&gt;   &lt;NA&gt;   9711EP      Gron…  6.57  53.2      7
-## 4 Heres…      3 &lt;NA&gt;   &lt;NA&gt;   9711EP      Gron…  6.57  53.2     36
-## 5 Heres…      9 &lt;NA&gt;   &lt;NA&gt;   9711ER      Gron…  6.57  53.2      9
-## 6 Heres…      1 a      &lt;NA&gt;   9711EP      Gron…  6.57  53.2     12
-## 7 Heres…     11 &lt;NA&gt;   &lt;NA&gt;   9711ER      Gron…  6.57  53.2     11
+## 3 Heres…     11 &lt;NA&gt;   &lt;NA&gt;   9711ER      Gron…  6.57  53.2     11
 ## # … with 1 more variable: distance_m &lt;dbl&gt;</code></pre>
 </div>
 <div id="example-2" class="section level2">
@@ -389,8 +388,8 @@ points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius
                  lat = c(53.21369, 53.21326))
 concentration(df, Groningen, value = amount, radius = 100)</code></pre>
 <pre><code>##   location      lon      lat concentration
-## 1       p1 6.561561 53.21369          3819
-## 2       p2 6.561398 53.21326          4771</code></pre>
+## 1       p1 6.561561 53.21369          2055
+## 2       p2 6.561398 53.21326          2892</code></pre>
 </div>
 </div>
 
