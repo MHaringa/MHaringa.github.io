@@ -334,12 +334,12 @@ library(dplyr)
 system.time(nl_gemeente_read &lt;- st_read(&quot;data/nl_gemeente_2018/nl_gemeente_2018.shp&quot;, 
                                         quiet = TRUE))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.022   0.004   0.029</code></pre>
+##   0.020   0.004   0.027</code></pre>
 <pre class="r"><code>system.time(ogr_read &lt;- readOGR(dsn = &quot;data/nl_gemeente_2018/nl_gemeente_2018.shp&quot;, 
                                 layer = &quot;nl_gemeente_2018&quot;, 
                                 verbose = FALSE))</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.439   0.009   0.465</code></pre>
+##   0.449   0.010   0.525</code></pre>
 <p>Let’s check the contents of this simple feature object. The short report printed gives the geometry type, mentions that there are 380 features (records, represented as rows) and 3 fields (attributes, represented as columns). Each row is a simple feature: a single record, or data.frame row, consisting of attributes and geometry.</p>
 <pre class="r"><code>nl_gemeente_read</code></pre>
 <pre><code>## Simple feature collection with 380 features and 3 fields
@@ -459,7 +459,6 @@ insurance_map_sf2_cut &lt;- insurance_map_sf2 %&gt;%
 
 ggplot(insurance_map_sf2_cut) + 
   geom_sf(aes(fill = output_cut), size = .1, color = &quot;grey65&quot;)  + 
-  coord_sf(datum = NA) + # Remove grid
   scale_fill_viridis_d() +
   theme_void() +
   labs(fill = &quot;Sum insured (x 1 mln EUR)&quot;)</code></pre>

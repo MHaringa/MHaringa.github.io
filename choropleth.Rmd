@@ -123,7 +123,6 @@ insurance_map_sf2_cut <- insurance_map_sf2 %>%
 
 ggplot(insurance_map_sf2_cut) + 
   geom_sf(aes(fill = output_cut), size = .1, color = "grey65")  + 
-  coord_sf(datum = NA) + # Remove grid
   scale_fill_viridis_d() +
   theme_void() +
   labs(fill = "Sum insured (x 1 mln EUR)")
