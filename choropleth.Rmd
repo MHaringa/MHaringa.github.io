@@ -64,14 +64,14 @@ nl_gemeente_wgs84 <- nl_gemeente_read %>%
 This example uses insurance data. The data shows the sum insured for 20,000 postal codes in the Netherlands. The goal is to aggregate this sums on the municipality level. Therefore for each point in this data set we should find the corresponding polygon. The polygons are shaded according to the sum of the amounts within the boundaries of the polygon. 
 
 ```{r}
-insurance <- readRDS("data/insurance.rds") 
-insurance
+spatialrisk::insurance
+
 ```
 
 Convert points to a simple feature object. Note that the argument `crs` (coordinate reference system) should be the same EPSG code as above. 
 
 ```{r}
-insurance_sf <- st_as_sf(insurance, coords = c("lon", "lat"), crs = 4326) 
+insurance_sf <- st_as_sf(spatialrisk::insurance, coords = c("lon", "lat"), crs = 4326) 
 ```
 
 # Merge sf objects
@@ -172,15 +172,12 @@ In many problems it is common to have the data already on the level of the polyg
 
 ```{r, warning = FALSE, message = FALSE}
 
-nl_postcode_read <- st_read("data/nl_postcode4_2015/nl_postcode4_2015.shp", 
-                                        quiet = TRUE)
-
-pc_level <- insurance %>%
-  mutate(pc4txt = stringr::str_sub(postcode, 1, 4)) %>%
-  group_by(pc4txt) %>%
+pc_level <- spatialrisk::insurance %>%
+  mutate(pc4 = as.numeric(stringr::str_sub(postcode, 1, 4))) %>%
+  group_by(pc4) %>%
   summarize(amount = sum(amount)) %>%
   ungroup() %>%
-  left_join(nl_postcode_read, .)
+  left_join(spatialrisk::nl_postcode4, .)
 
 tmap_mode("view")
 tm_shape(pc_level) +
@@ -198,6 +195,7 @@ Note that approaching data from a small-area spatial perspective poses challenge
 
 
 ```{r, message = FALSE, warning = FALSE}
+
 cent <- st_geometry(pc_level) %>% st_centroid %>% st_coordinates 
 
 blocks_level <- pc_level %>% 
@@ -211,7 +209,6 @@ blocks_level <- pc_level %>%
 ggplot(blocks_level) + 
   geom_sf(aes(fill = denscut), size = .1, color = "grey65") + 
   scale_fill_viridis_d() +
-  coord_sf(datum = NA) + # Remove grid
   theme_void() +
   labs(fill = "Ratio", 
        title = "The sum insured divided by the area of the square.")
