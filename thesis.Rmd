@@ -9,7 +9,7 @@ output:
 ---
 
 
-The project below describes parts of my Master's thesis to obtain my degree in Actuarial Science and Mathematical Finance. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. 
+This post starts off by discussing a data driven strategy for the construction of tariff classes in P&C (a.k.a. non-life) insurance. This strategy is incorporated in my insurancerating package in R. The goal is to bin continuous factors such that categorical risk factors result which capture the effect of the covariate on the response in an accurate way, while being easy to use in a generalized linear model (GLM).
 
 <!--html_preserve-->
 

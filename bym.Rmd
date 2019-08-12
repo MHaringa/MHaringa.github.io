@@ -1,0 +1,23 @@
+---
+title: "Bayesian epidemiological techniques to map vehicle claim risk"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    number_sections: false
+---
+
+This post describes how to use Bayesian epidemiological techniques to map vehicle claim risk. This is done by focusing on a case-study for the prediction of claim risk in a MTPL portfolio on the municipality level in the Netherlands. In many cases observed claim frequencies for small-areas are unreliable (small-areas often have no observations). The goal of this post is to show how to produce more reliable estimates for the number of claims on a small-area level. A more thorough description of the methods applied can be found in my master’s thesis.
+ 
+# MTPL data set
+The MTPL data set contains xx rows with random (fake) yet meaningful entries for a Dutch MTPL product. The number of claims and exposures were aggregated at the municipality resolution.
+ 
+Also the road density and traffic density are known on the municipality resolution. The road density is calculated as the road length in kilometers per square kilometer. The traffic density is calculated as the number of vehicles per road length in kilometers.
+ 
+# Besag-York-Mollie model
+Bayesian inference may be performed using the Integrated Nested Laplace Approximation (INLA) approach (Rue et al. 2009) which is implemented in the R package R-INLA (Lindgren and Rue 2015).
+ 
+Besag, York, and Mollie (1991) proposed an appropriate way of producing more reliable estimates of relative risks for small-areas in a Bayesian framework using Markov chain Monte Carlo methods (MCMC). This is by borrowing required information from the neighbouring areas. The model is extensively used in the case of the areal count data of rare diseases.
+ 
+The model splitted the variability on a small-area level as the sum of a spatially correlated variable (which depends on the values of its neigbours) plus an area-independent effect (which reflects local heterogeneity). A Poisson likelihood (data layer) is used for count data. The second layer, often called the process layer, links the log risk to spatially structured and unstructured components as well as covariates for road density and traffic density. The remaining layer(s) contain(s) the priors. The conditional distribution of each area-specific spatially structured component follow a normal distribution with mean and variance (the average of its neighbours, inversely proportional to the number of its neighbours).
