@@ -2,51 +2,11 @@
 title: "Maximum Fire Risk Insured"
 output:
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
     number_sections: false
 ---
 
-A recently European Commission regulation requires insurance companies to determine the maximum value of insured fire risk policies of all buildings that are partly or fully located within circle of a radius of 200m. In this post I plan to focus the discussion on spatial risk, and then specifically concentration risk in the context of Solvency II (the EU insurance regultation framework). This post starts off by discussing concentration risk in the context of Solvency II, and how insurers could benefit from my R-package `spatialrisk` (see [here]( https://CRAN.R-project.org/package=spatialrisk)), and then narrows in to focus on the application of the R-package on actuarial work. 
+See [package website of spatialrisk](https://mharinga.github.io/spatialrisk/). 
 
-# Introduction
-
-Among other aspects Solvency II comprises risk-based capital requirements that need to be allocate in order to ensure the financial stability of insurance companies with assets and liabilities valued on a market consistent basis. More precisely the Solvency Capital Requirement (SRC) should reflect a level of eligible own funds that enables the insurance undertakings to absorb significant losses without compromising the fulfilling of its obligations. As a risk-sensitive and prudential regime, Solvency II wants to take into account all possible outcomes, including events of major magnitude. Therefore, the capital requirement for catastrophe risk should assess all possible catastrophes, as natural catastrophes and man-made catastrophes, and establish how these risks should be quantified to integrate the whole.
-
-In this post I focus on the man-made catastrophe risk which comprises extreme events directly accountable to men, and then specifically the capital requirement for fire risk (as fire and explosion) that should "(...) be equal to the loss in basic own funds of insurance and reinsurance undertakings that would result from an instantaneous loss of an amount that (...) is equal to the sum insured by the insurance or reinsurance undertaking with respect to the largest fire risk concentration". The fire risk assumes 100% damage on the total sum of the capital insured for each building located partly or fully within a 200m radius. Until now, and to my knowledge, the choice of 200m as the radius for the concentration was based on statistics and expert judgment.
-
-This problem can be stated as: "find the centre coordinates of a circle with a fixed radius that maximizes the coverage of total fire risk insured". This problem can be viewed as a particular instance of the Maximal Covering Location Problem (MCLP) with fixed radius. This meta-heuristic method allows the circle centre as being to be placed in any point of the plane, while the algorithm in the `spatialrisk` package assumes the circle centre as being one of the building. The computational performance of the `spatialrisk` package is investigated to overcome the long times the MCLP algorithm is taking. The algorithm is written in C++. The algorithm needs about 5 minutes to calculate the risk insured for 500,000 buildings. 
-
-
-# spatialrisk
-
-The package offers an effective approach to calculate the *standard formula* under Solvency II. The *standard formula* under Solvency II asks companies to report their largest fire concentration in respect of the fire peril within a radius of 200m. This is the maximum gross sum insured of the set of buildings fully or partly located within this radius. 
-
-You can install spatialrisk from github with:
-  
-```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("MHaringa/spatialrisk")
-```
-
-## Example 1
-Find all observations in dataframe `Groningen` within radius of 50m from center point *(lon,lat) = (6.561561,53.21326)*:
-  
-```{r example}
-library(spatialrisk)
-points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius = 50)
-```
-
-## Example 2
-Find for each row in dataframe `df` the observations in dataframe `Groningen` within radius of 100m from lon/lat pair. Then the function takes for the obtained observations the sum of the column `amount`: 
-  
-```{r example2}
-df <- data.frame(location = c("p1", "p2"), 
-                 lon = c(6.561561, 6.561398), 
-                 lat = c(53.21369, 53.21326))
-concentration(df, Groningen, value = amount, radius = 100)
-```
 
 
 

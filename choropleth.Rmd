@@ -13,8 +13,6 @@ The goal of this post is to show how to create choropleths of the Netherlands in
 The above is possible using the `sp` package, which is widespread and well-known in the R community, but I decided to use the `sf` package because `sf` would be the next generation standard of spatial objects in R (https://cran.r-project.org/web/packages/sf/index.html). It implements a formal standard called "Simple Features" ([see Wikipedia](https://en.wikipedia.org/wiki/Simple_Features)) that specifies a storage and access model of spatial geometries (point, line, polygon). A feature geometry is called simple when it consists of points connected by straight line pieces, and does not intersect itself. This standard has been adopted widely, not only by spatial databases such as PostGIS, but also more recent standards such as GeoJSON. Knowing the usage and functionality of `sf` will probably be beneficial. 
 
 
-
-
 # Reading a shapefile 
 The first step is to read the shapefile of the Netherlands on the municipality level. There are different ways one can load a shapefile into R. 
 A quick benchmark shows the function `st_read()` from `sf` does read much, much more quickly compared to the common used function `readOGR()` from `rgdal`. Note that shapefiles consist of more than one file, all with identical basename, which reside in the same directory. 
@@ -214,15 +212,6 @@ ggplot(blocks_level) +
 ```
 
 
-# Final Thoughts
-This has been a simple introduction to approaches for creating choropleth maps in R with code which users can easily adapt to their own projects. Don't worry if the code doesn't make sense, try and recreate the example or apply the existing code to your own data. Some final thoughts:
 
-- You can use R’s base graphics if you know how, but with the other packages out there you don't need to.
-- The choice of colour palette and the breaks are just as important as the package you use. The wrong choice will make any output look bad.
-- On the subject of colour, try experimenting with the viridis package - it's pretty cool!
-- `tmap` is a very underrated package and my personal choice if I want to quickly produce something. The syntax is not hard to pick up.
-- `ggplot2` is powerful, and popular for a reason. With a little know-how, it will always be a strong and flexible choice and understanding how it’s put together will allow you to do many other things in R besides choropleths.
-- Leaflet is fantastic and usually produces beautiful output. It is increasingly useful to be able to present your data online and with scope for the user to interact with it, though for hard-copy publishing it may not be worthwhile.
-- This introduction to choropleths is proof that there are many ways to achieve most goals in R. Try experimenting with each package and get a sense of what you find most comfortable. Consider the trade-off between the immediacy of mapping with packages such as GISTools, and the longer-term benefits of mastering a package with the power of ggplot2.
 
 

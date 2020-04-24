@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -20,9 +19,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -102,7 +98,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -164,6 +159,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -180,69 +176,6 @@ summary {
 
 
 
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-.tocify-subheader {
-  display: inline;
-}
-.tocify-subheader .tocify-item {
-  font-size: 0.95em;
-}
-
-</style>
-
-
 
 </head>
 
@@ -250,16 +183,6 @@ div.tocify {
 
 
 <div class="container-fluid main-container">
-
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -311,44 +234,7 @@ div.tocify {
 </div>
 
 
-<p>A recently European Commission regulation requires insurance companies to determine the maximum value of insured fire risk policies of all buildings that are partly or fully located within circle of a radius of 200m. In this post I plan to focus the discussion on spatial risk, and then specifically concentration risk in the context of Solvency II (the EU insurance regultation framework). This post starts off by discussing concentration risk in the context of Solvency II, and how insurers could benefit from my R-package <code>spatialrisk</code> (see <a href="https://CRAN.R-project.org/package=spatialrisk">here</a>), and then narrows in to focus on the application of the R-package on actuarial work.</p>
-<div id="introduction" class="section level1">
-<h1>Introduction</h1>
-<p>Among other aspects Solvency II comprises risk-based capital requirements that need to be allocate in order to ensure the financial stability of insurance companies with assets and liabilities valued on a market consistent basis. More precisely the Solvency Capital Requirement (SRC) should reflect a level of eligible own funds that enables the insurance undertakings to absorb significant losses without compromising the fulfilling of its obligations. As a risk-sensitive and prudential regime, Solvency II wants to take into account all possible outcomes, including events of major magnitude. Therefore, the capital requirement for catastrophe risk should assess all possible catastrophes, as natural catastrophes and man-made catastrophes, and establish how these risks should be quantified to integrate the whole.</p>
-<p>In this post I focus on the man-made catastrophe risk which comprises extreme events directly accountable to men, and then specifically the capital requirement for fire risk (as fire and explosion) that should “(…) be equal to the loss in basic own funds of insurance and reinsurance undertakings that would result from an instantaneous loss of an amount that (…) is equal to the sum insured by the insurance or reinsurance undertaking with respect to the largest fire risk concentration”. The fire risk assumes 100% damage on the total sum of the capital insured for each building located partly or fully within a 200m radius. Until now, and to my knowledge, the choice of 200m as the radius for the concentration was based on statistics and expert judgment.</p>
-<p>This problem can be stated as: “find the centre coordinates of a circle with a fixed radius that maximizes the coverage of total fire risk insured”. This problem can be viewed as a particular instance of the Maximal Covering Location Problem (MCLP) with fixed radius. This meta-heuristic method allows the circle centre as being to be placed in any point of the plane, while the algorithm in the <code>spatialrisk</code> package assumes the circle centre as being one of the building. The computational performance of the <code>spatialrisk</code> package is investigated to overcome the long times the MCLP algorithm is taking. The algorithm is written in C++. The algorithm needs about 5 minutes to calculate the risk insured for 500,000 buildings.</p>
-</div>
-<div id="spatialrisk" class="section level1">
-<h1>spatialrisk</h1>
-<p>The package offers an effective approach to calculate the <em>standard formula</em> under Solvency II. The <em>standard formula</em> under Solvency II asks companies to report their largest fire concentration in respect of the fire peril within a radius of 200m. This is the maximum gross sum insured of the set of buildings fully or partly located within this radius.</p>
-<p>You can install spatialrisk from github with:</p>
-<pre class="r"><code># install.packages(&quot;devtools&quot;)
-devtools::install_github(&quot;MHaringa/spatialrisk&quot;)</code></pre>
-<div id="example-1" class="section level2">
-<h2>Example 1</h2>
-<p>Find all observations in dataframe <code>Groningen</code> within radius of 50m from center point <em>(lon,lat) = (6.561561,53.21326)</em>:</p>
-<pre class="r"><code>library(spatialrisk)
-points_in_circle(Groningen, lon_center = 6.571561, lat_center = 53.21326, radius = 50)</code></pre>
-<pre><code>## # A tibble: 3 x 10
-##   street number letter suffix postal_code city    lon   lat amount
-##   &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Heres…      5 &lt;NA&gt;   &lt;NA&gt;   9711EP      Gron…  6.57  53.2      5
-## 2 Heres…      3 a      &lt;NA&gt;   9711EP      Gron…  6.57  53.2     36
-## 3 Heres…     11 &lt;NA&gt;   &lt;NA&gt;   9711ER      Gron…  6.57  53.2     11
-## # … with 1 more variable: distance_m &lt;dbl&gt;</code></pre>
-</div>
-<div id="example-2" class="section level2">
-<h2>Example 2</h2>
-<p>Find for each row in dataframe <code>df</code> the observations in dataframe <code>Groningen</code> within radius of 100m from lon/lat pair. Then the function takes for the obtained observations the sum of the column <code>amount</code>:</p>
-<pre class="r"><code>df &lt;- data.frame(location = c(&quot;p1&quot;, &quot;p2&quot;), 
-                 lon = c(6.561561, 6.561398), 
-                 lat = c(53.21369, 53.21326))
-concentration(df, Groningen, value = amount, radius = 100)</code></pre>
-<pre><code>##   location      lon      lat concentration
-## 1       p1 6.561561 53.21369          2055
-## 2       p2 6.561398 53.21326          2892</code></pre>
-</div>
-</div>
+<p>See <a href="https://mharinga.github.io/spatialrisk/">package website of spatialrisk</a>.</p>
 
 </div> <!-- articleBandContent -->
 </div> <!-- pageContent -->
@@ -367,8 +253,6 @@ concentration(df, Groningen, value = amount, radius = 100)</code></pre>
 <script type="text/javascript" src="//cdn.bizible.com/scripts/bizible.js" async=""></script>
 
 
-</div>
-</div>
 
 </div>
 
@@ -401,32 +285,6 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = false;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 
 </body>

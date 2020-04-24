@@ -1,5 +1,5 @@
 ---
-title: "Construction of Insurance Tariff Classes"
+title: "Bayesian epidemiological techniques to map vehicle claim risk"
 output:
   html_document:
     toc: true
@@ -8,8 +8,7 @@ output:
     number_sections: false
 ---
 
-
-This post starts off by discussing a data driven strategy for the construction of tariff classes in P&C (a.k.a. non-life) insurance. This strategy is incorporated in my insurancerating package in R. The goal is to bin continuous factors such that categorical risk factors result which capture the effect of the covariate on the response in an accurate way, while being easy to use in a generalized linear model (GLM).
+The project describes parts of my Master’s thesis to obtain my degree in Actuarial Science and Mathematical Finance. 
 
 <!--html_preserve-->
 
@@ -27,58 +26,19 @@ This post starts off by discussing a data driven strategy for the construction o
 
 <!--/html_preserve-->
 
+This post describes how to use Bayesian epidemiological techniques to map vehicle claim risk. This is done by focusing on a case-study for the prediction of claim risk in a MTPL portfolio on the municipality level in the Netherlands. In many cases observed claim frequencies for small-areas are unreliable (small-areas often have no observations). The goal of this post is to show how to produce more reliable estimates for the number of claims on a small-area level. A more thorough description of the methods applied can be found in my master’s thesis.
+ 
+# MTPL data set
+The MTPL data set contains xx rows with random (fake) yet meaningful entries for a Dutch MTPL product. The number of claims and exposures were aggregated at the municipality resolution.
+ 
+Also the road density and traffic density are known on the municipality resolution. The road density is calculated as the road length in kilometers per square kilometer. The traffic density is calculated as the number of vehicles per road length in kilometers.
+ 
+# Besag-York-Mollie model
+Bayesian inference may be performed using the Integrated Nested Laplace Approximation (INLA) approach (Rue et al. 2009) which is implemented in the R package R-INLA (Lindgren and Rue 2015).
+ 
+Besag, York, and Mollie (1991) proposed an appropriate way of producing more reliable estimates of relative risks for small-areas in a Bayesian framework using Markov chain Monte Carlo methods (MCMC). This is by borrowing required information from the neighbouring areas. The model is extensively used in the case of the areal count data of rare diseases.
+ 
+The model splitted the variability on a small-area level as the sum of a spatially correlated variable (which depends on the values of its neigbours) plus an area-independent effect (which reflects local heterogeneity). A Poisson likelihood (data layer) is used for count data. The second layer, often called the process layer, links the log risk to spatially structured and unstructured components as well as covariates for road density and traffic density. The remaining layer(s) contain(s) the priors. The conditional distribution of each area-specific spatially structured component follow a normal distribution with mean and variance (the average of its neighbours, inversely proportional to the number of its neighbours).
 
-# Introduction 
-
-The goal of insurancerating is to give analytic techniques that can be used in insurance rating. It provides a data driven strategy for the construction of tariff classes in P&C insurance. The goal is to bin the continuous factors such that categorical risk factors result which capture the effect of the covariate on the response in an accurate way, while being easy to use in a generalized linear model (GLM).
-
-It also adds functionality showing additional lines for the reference categories in the levels of the coefficients in the output of a generalized linear regression analysis. In addition it implements a procedure determining the level of a factor with the largest exposure, 
-and thereafter changing the base level of the factor to this level. 
-
-# Installation
-
-You can install insurancerating from github with:
-
-```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("MHaringa/insurancerating")
-```
-
-# Example
-This is a basic example which shows the techniques provided in insurancerating. 
-
-The first part shows how to construct tariff classes for the variable *age_policyholder* in the MTPL dataset: 
-
-```{r example, eval = TRUE, fig.path = "man/figures/", message = FALSE, warning = FALSE}
-library(insurancerating)
-library(ggplot2)
-library(dplyr)
-x <- construct_tariff_classes(data = MTPL, nclaims = nclaims, x = age_policyholder, exposure = exposure)
-```
-
-Show tariff classes: 
-
-```{r plaatje, eval = TRUE, fig.path = "man/figures/"}
-autoplot(x)
-```
-
-The second part adds the constructed tariff classes for the variable *age_policyholder* to the dataset, and sets the base level of the factor *age_policyholder* to the level with the largest exposure. In this example the class for ages (35,52], which contains the largest exposure. 
-
-```{r example2, eval = TRUE, message = FALSE, warning = FALSE}
-dat <- MTPL %>%
-  mutate(age_policyholder_class = x$tariff_classes) %>%
-  mutate_if(is.character, as.factor) %>%
-  mutate_if(is.factor, list(~biggest_reference(., exposure)))
-str(dat)
-```
-
-The last part is to fit a *generalized linear model*. The function rating_factors prints the output including the reference group.
-
-```{r example3, eval = TRUE}
-model <- glm(nclaims ~ age_policyholder_class, offset = log(exposure), family = "poisson", data = dat)
-rating_factors(model)
-```
-
-
-
+To do. 
 
