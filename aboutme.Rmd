@@ -4,7 +4,7 @@ title: "About me"
 
 I have a passion for data visualization and sharing my knowledge on Quora, where I write answers to help people interested in Data Science, Probability, Statistics, and more.
 
-<center><img src="images/foto_martin.png" height="85" width="170" style="margin: 10px 0px"></center>
+<center><img src="images/foto_martin.png" height="185" width="170" style="margin: 10px 0px"></center>
 
 I studied Econometrics at the University of Groningen, and Actuarial Science and Mathematical Finance at the University of Amsterdam.
 

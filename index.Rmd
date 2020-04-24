@@ -42,9 +42,9 @@ $("#pageContent").removeClass("standardPadding");
     <img class="imageThree" src="images/thesisvoorblad.png"/>
     <div class="bandContent vCenter">
       <div class="blurb">
-        <div>In my Master's thesis I used Laplace approximations to predict the number of claims in a motor insurance portfolio on a small-area level. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. </div>
+        <div>In my master's thesis I used Bayesian epidemiological techniques to predict vehicle claim in a motor insurance portfolio on a small-area level. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. </div>
         <div class="actions">
-          <div><a href="thesis.html"><button class="bigButton gallery">Construction of Insurance Tariff Classes</button></a></div>
+          <div><a href="thesis.html"><button class="bigButton gallery">Prediction of Vehicle Claim Risk</button></a></div>
         </div>
       </div>
     </div>
@@ -52,6 +52,8 @@ $("#pageContent").removeClass("standardPadding");
 </div>
 
 <!--/html_preserve-->
+
+
 
 
 
