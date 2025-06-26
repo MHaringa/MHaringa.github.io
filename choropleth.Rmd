@@ -21,16 +21,11 @@ The function `st_read()` from `sf` is used to load the shapefile.
 
 ```{r, message = FALSE, warning = FALSE}
 library(sf)
-library(rgdal)
+#library(rgdal)
 library(dplyr)
 
-system.time(nl_gemeente_read <- st_read("data/nl_gemeente_2018/nl_gemeente_2018.shp", 
-                                        quiet = TRUE))
-
-system.time(ogr_read <- readOGR(dsn = "data/nl_gemeente_2018/nl_gemeente_2018.shp", 
-                                layer = "nl_gemeente_2018", 
-                                verbose = FALSE))
-
+nl_gemeente_read <- st_read("data/nl_gemeente_2018/nl_gemeente_2018.shp", 
+                            quiet = TRUE)
 ```
 
 Let's check the contents of this simple feature object. The short report printed gives the geometry type, mentions that there are 380 features (records, represented as rows) and 3 fields (attributes, represented as columns). Each row is a simple feature: a single record, or data.frame row, consisting of attributes and geometry. 
@@ -52,10 +47,10 @@ Convert the coordinate reference system of the simple feature object from NA to 
 
 ```{r}
 
-nl_gemeente_wgs84 <- nl_gemeente_read %>%
-  st_buffer(0) %>% # Make invalid geometries valid
-  st_transform(crs = 4326) %>% # Convert coordinates to WGS84
-  mutate(id = 1:nrow(.)) # Add column with id to each municipality
+nl_gemeente_wgs84 <- nl_gemeente_read |>
+  st_buffer(0) |> # Make invalid geometries valid
+  st_transform(crs = 4326) |> # Convert coordinates to WGS84
+  mutate(id = row_number()) # Add column with id to each municipality
 ```
 
 # Reading insurance data
@@ -76,7 +71,7 @@ insurance_sf <- st_as_sf(spatialrisk::insurance, coords = c("lon", "lat"), crs =
 In the next step we merge the simple feature objects. The function `sf::st_join` can be used to do a spatial left or inner join. See documentation ?st_join on how to carry out an inner join. 
 
 ```{r}
-insurance_map_sf <- nl_gemeente_wgs84 %>% st_join(., insurance_sf) 
+insurance_map_sf <- nl_gemeente_wgs84 |> st_join(insurance_sf) 
 insurance_map_sf
 
 ```
@@ -92,11 +87,10 @@ insurance_map <- insurance_map_sf
 st_geometry(insurance_map) <- NULL
 
 # Aggregate
-insurance_map_sf2 <- insurance_map %>%
-  group_by(id) %>% 
-  summarize(output = sum(amount)) %>% 
-  ungroup() %>%
-  left_join(nl_gemeente_wgs84, .) 
+insurance_map_sf0 <- insurance_map |>
+  summarize(output = sum(amount), .by = c(id)) 
+
+insurance_map_sf2 <- left_join(nl_gemeente_wgs84, insurance_map_sf0) 
 
 class(insurance_map_sf2)
 ```
@@ -116,7 +110,7 @@ library(ggplot2)
 library(insurancerating)
 library(viridis)
 
-insurance_map_sf2_cut <- insurance_map_sf2 %>%
+insurance_map_sf2_cut <- insurance_map_sf2 |>
   mutate(output_cut = insurancerating::fisher(output / 1e6, n = 7)) 
 
 ggplot(insurance_map_sf2_cut) + 
@@ -134,15 +128,17 @@ library(tmap)
 
 tmap_mode("plot")
 tm_shape(insurance_map_sf2) +
-  tm_polygons("output", 
-              id = "gemeentena", 
-              palette = "viridis", 
-              style = "fisher", 
-              title = "Insurance (in euros)", 
-              border.col = "white", 
-              lwd = .1) +
+  tm_polygons(
+    "output", 
+    id = "gemeentena", 
+    fill.scale = tmap::tm_scale_intervals(style = "fisher",
+                                          values = "viridis",
+                                          n = 5),
+    fill.legend = tmap::tm_legend(title = "Insurance (in euros)"),
+    lwd = .1
+  ) +
   tm_compass(position = c("right", "bottom")) +
-  tm_scale_bar(position = c("left", "bottom")) +
+  tm_scalebar(position = c("left", "bottom")) +
   tm_style("gray")
 
 ```
@@ -155,12 +151,16 @@ insurance_map_sf2$gemeentena <- stringi::stri_encode(insurance_map_sf2$gemeenten
 
 tmap_mode("view")
 tm_shape(insurance_map_sf2) +
-  tm_polygons("output", 
-              id = "gemeentena", 
-              palette = "viridis", 
-              style = "fisher", 
-              title = "Insurance (in euros)", 
-              alpha = .5)
+  tm_polygons(
+    "output", 
+    id = "gemeentena", 
+    fill.scale = tmap::tm_scale_intervals(style = "fisher",
+                                          values = "viridis",
+                                          n = 5),
+    fill.legend = tmap::tm_legend(title = "Insurance (in euros)"),
+    lwd = .1, 
+    fill_alpha = .5
+  )
 ```
 
 
@@ -169,21 +169,24 @@ In many problems it is common to have the data already on the level of the polyg
 
 ```{r, warning = FALSE, message = FALSE}
 
-pc_level <- spatialrisk::insurance %>%
-  mutate(pc4 = as.numeric(stringr::str_sub(postcode, 1, 4))) %>%
-  group_by(pc4) %>%
-  summarize(amount = sum(amount)) %>%
-  ungroup() %>%
-  left_join(spatialrisk::nl_postcode4, .)
+pc_level0 <- spatialrisk::insurance |>
+  mutate(pc4 = as.numeric(stringr::str_sub(postcode, 1, 4))) |>
+  summarize(amount = sum(amount), .by = c(pc4)) 
+
+pc_level <- left_join(spatialrisk::nl_postcode4, pc_level0)
 
 tmap_mode("view")
 tm_shape(pc_level) +
-  tm_polygons("amount", 
-              id = "pc4_naam", 
-              palette = "viridis", 
-              style = "fisher", 
-              title = "Insurance (in euros)", 
-              alpha = 0.5) 
+  tm_polygons(
+    "amount", 
+    id = "areaname", 
+    fill.scale = tmap::tm_scale_intervals(style = "fisher",
+                                          values = "viridis",
+                                          n = 5),
+    fill.legend = tmap::tm_legend(title = "Insurance (in euros)"),
+    lwd = .1, 
+    fill_alpha = .5
+  ) 
 
 ```
 
@@ -193,14 +196,18 @@ Note that approaching data from a small-area spatial perspective poses challenge
 
 ```{r, message = FALSE, warning = FALSE}
 
-cent <- st_geometry(pc_level) %>% st_centroid %>% st_coordinates 
+pc_level_nw <- st_make_valid(pc_level)
 
-blocks_level <- pc_level %>% 
-  mutate(area = as.numeric(st_area(.)), longitude = cent[,1], latitude = cent[,2]) %>%
-  group_by(cut(longitude,5), cut(latitude,5))  %>% 
-  summarise(area = sum(area), amount = sum(amount, na.rm = TRUE), dens = mean(amount/area)) %>%
-  ungroup() %>%
-  mutate(denscut = insurancerating::fisher(dens, n = 5)) %>%
+cent <- st_geometry(pc_level_nw) |> st_centroid() |> st_coordinates()
+
+blocks_level <- pc_level_nw |> 
+  mutate(area = as.numeric(st_area(pc_level_nw)), longitude = cent[,1], latitude = cent[,2]) |>
+  group_by(cut(longitude,5), cut(latitude,5))  |>
+  summarise(area = sum(area), 
+            amount = sum(amount, na.rm = TRUE), 
+            dens = mean(amount / area)) |>
+  ungroup() |>
+  mutate(denscut = insurancerating::fisher(dens, n = 5)) |>
   filter(!is.na(denscut))
 
 ggplot(blocks_level) + 
@@ -209,6 +216,7 @@ ggplot(blocks_level) +
   theme_void() +
   labs(fill = "Ratio", 
        title = "The sum insured divided by the area of the square.")
+
 ```
 
 
