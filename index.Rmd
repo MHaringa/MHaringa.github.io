@@ -1,62 +1,81 @@
 ---
-title: "Welcome!"
+title: ""
 output:
   html_document:
-    toc_float: false
-    includes:
-      before_body: [include_header.html, include_header_navpage.html]
+    theme: null
+    highlight: null
+    toc: false
+    self_contained: true
 ---
 
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  background: #ffffff;
+  color: #111;
+  max-width: 640px;
+  margin: 120px auto;
+  padding: 0 24px;
+  line-height: 1.6;
+}
 
-```{js}
-$("#rStudioHeader").removeClass("alwaysShrunk");
-$("#pageContent").removeClass("standardPadding");
-```
+h1 {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
 
+p {
+  font-size: 18px;
+  color: #444;
+  margin: 12px 0;
+}
 
-<!--html_preserve-->
+a {
+  color: #111;
+  text-decoration: none;
+  border-bottom: 1px solid #ccc;
+  transition: border-color 0.2s ease;
+}
 
-<div id="homeContent">
-  <div class="band full blue first rightText">
-    <div class="bandContent vCenter">
-      <div class="blurb">
-        <div class="tagline">Welcome!</div>
-        <div>Welcome to website and blog of Martin Haringa. A personal blog about my fumblings with statistics, data visualization and anything R. </div>
-      </div>
-    </div>
-    <img class="imageOne" src="images/transparantlab.png"/>
-  </div>
-  <div class="band full gray1 second leftText">
-    <div class="bandContent vCenter">
-      <div class="blurb">
-        <div>The first post focuses on the maximum value of insured fire risk policies of all buildings that are partly or fully located within circle of a radius of 200m. </div>
-      </div>
-       <div class="actions">
-          <div><a href="concentration.html"><button class="bigButton getStarted">Maximum Fire Risk Insured</button></a></div>
-        </div>
-    </div>
-    <img class="imageTwo" src="images/concentration_image.png"/>
-  </div>
+a:hover {
+  border-color: #111;
+}
 
-  <div class="band full third rightText">
-    <img class="imageThree" src="images/thesisvoorblad.png"/>
-    <div class="bandContent vCenter">
-      <div class="blurb">
-        <div>In my master's thesis I used Bayesian epidemiological techniques to predict vehicle claim in a motor insurance portfolio on a small-area level. The thesis was nominated for the Johan de Witt award for best actuarial thesis in 2016. </div>
-        <div class="actions">
-          <div><a href="thesis.html"><button class="bigButton gallery">Prediction of Vehicle Claim Risk</button></a></div>
-        </div>
-      </div>
-    </div>
-  </div>
+.section {
+  margin-top: 32px;
+}
+
+.muted {
+  color: #777;
+  font-size: 15px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 40px 0;
+}
+</style>
+
+# Martin Haringa
+
+Actuarial pricing — structured, interpretable, and implementable.
+
+<div class="section">
+<p class="muted">Work</p>
+
+[insurancerating](https://github.com/MHaringa/insurancerating)  
+<span class="muted">Framework for insurance pricing in R</span>
 </div>
 
-<!--/html_preserve-->
+<div class="section">
+<p class="muted">Documentation</p>
 
+[Package site](/insurancerating/)
+</div>
 
+---
 
-
-
-
-
-
+<span class="muted">Built with R and GitHub Pages</span>
