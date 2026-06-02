@@ -64,7 +64,7 @@ hr {
 Actuarial pricing — structured, interpretable, and implementable.
 
 <div class="section">
-<p class="muted">Work</p>
+<p class="muted">Projects</p>
 
 [insurancerating](https://github.com/MHaringa/insurancerating)  
 <span class="muted">Framework for insurance pricing in R</span>
@@ -76,6 +76,10 @@ Actuarial pricing — structured, interpretable, and implementable.
 [Package site](/insurancerating/)
 </div>
 
----
+<div class="section">
+<p class="muted">CV</p>
 
-<span class="muted">Built with R and GitHub Pages</span>
+[View online](cv/) <br>
+[Download PDF](cv/Martin_Haringa_CV.pdf)
+</div>
+

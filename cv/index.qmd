@@ -1,0 +1,126 @@
+---
+format:
+  html:
+    css: cv.css
+    toc: false
+    embed-resources: true
+---
+
+::: {.page}
+# Martin Haringa
+
+::: {.subtitle}
+Actuarial pricing — structured, interpretable, and implementable.
+:::
+
+::: {.tagline}
+Senior Pricing Actuary | Actuary AG (AAG)
+:::
+
+::: {.section-label}
+Profile
+:::
+
+Senior pricing actuary specialising in commercial non-life insurance.
+
+I combine actuarial modelling, portfolio analytics and software development to support pricing and portfolio management decisions. My professional interests include risk-based pricing, concentration risk, geospatial analytics and the development of open-source tools for insurance applications.
+
+::: {.section-label}
+Experience
+:::
+
+## Senior Pricing Actuary
+
+### ABN AMRO Verzekeringen · 2017–Present
+
+Responsible for commercial non-life insurance pricing, portfolio steering and the development of risk-based pricing frameworks.
+
+My work focuses on translating actuarial models into practical pricing solutions that are interpretable, governable and implementable in production.
+
+Key areas include:
+
+- Commercial insurance pricing and tariff development.
+- Portfolio steering and profitability analysis.
+- Risk segmentation and pricing governance.
+- Concentration risk and portfolio analytics.
+- Implementation of actuarial models and pricing methodologies.
+- Development of reusable analytical tooling and open-source software in R.
+
+## Delta Lloyd
+
+### Risk Trainee · Model Validator · Analyst · 2014–2017
+
+Selected for Delta Lloyd's risk development programme, combining rotations in actuarial risk management, model validation and Group Financial Risk Management.
+
+Worked on Solvency II-related projects, independent model validation and actuarial risk management, providing a broad foundation in insurance risk and quantitative analysis.
+
+## Earlier Experience
+
+### Teaching Assistant · University of Groningen · 2010–2014
+
+Teaching and supervising undergraduate students in mathematics, statistics and R.
+
+### Soccer Analyst · ORTEC · 2008–2011
+
+Quantitative performance analysis of professional football players for scouting and decision support.
+
+::: {.section-label}
+Selected Work
+:::
+
+## [insurancerating](https://mharinga.github.io/insurancerating/)
+
+### Open-source tools for insurance pricing in R
+
+Published on CRAN and actively maintained. A collection of reusable tools for actuarial and insurance pricing analyses, including functionality for rating factor analysis, tariff refinement, model interpretation and portfolio analytics.
+
+Developed to support common analytical tasks encountered in insurance pricing and portfolio management.
+
+## [spatialrisk](https://mharinga.github.io/spatialrisk/)
+
+### Open-source tools for spatial insurance analytics
+
+Published on CRAN and actively maintained. A collection of tools for spatial portfolio analysis and concentration risk assessment in non-life insurance.
+
+Designed to support geographic risk analysis, portfolio monitoring and spatial exposure assessment.
+
+
+::: {.section-label}
+Education
+:::
+
+## London School of Economics and Political Science (LSE)
+
+### MBA Essentials · 2025
+
+Certificate programme covering economics, corporate finance and strategy, with a focus on practical business decision-making.
+
+## University of Amsterdam
+
+### Actuarial Practice Cycle (AAG) · 2017–2018
+
+Completed the Actuarial Practice Cycle as part of the Amsterdam Executive Program in Actuarial Science, qualifying as a registered Actuary AG (AAG).
+
+## University of Amsterdam
+
+### MSc Actuarial Science and Mathematical Finance · 2014–2015
+
+Master's thesis: *Small-Area Analysis of Claim Frequency in Motor Insurance.*
+
+### Additional Education
+
+- Delta Lloyd Top Class Programme, de Baak (2016–2017)
+
+- BSc Econometrics & Operations Research, University of Groningen (2006–2013)
+
+::: {.section-label}
+Links
+:::
+
+[LinkedIn](https://www.linkedin.com)
+
+[GitHub](https://github.com/mharinga)
+
+[Package Site](https://mharinga.github.io/insurancerating/)
+
+:::

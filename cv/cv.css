@@ -1,0 +1,240 @@
+/* ==========================================================================
+   Martin Haringa CV
+   ========================================================================== */
+
+.quarto-title-block {
+  display: none;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  color: #111;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 80px 48px 80px 48px;
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+h1 {
+  font-size: 48px;
+  line-height: 1.05;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+  margin: 0 0 36px 0;
+}
+
+.subtitle {
+  font-size: 30px;
+  line-height: 1.35;
+  font-weight: 400;
+  color: #444;
+}
+
+.tagline {
+  font-size: 16px;
+  color: #888;
+  margin-bottom: 84px;
+}
+
+/* ==========================================================================
+   Section labels
+   ========================================================================== */
+
+.section-label {
+  font-size: 22px;
+  font-weight: 400;
+  color: #7a7a7a;
+  margin: 72px 0 28px 0;
+}
+
+/* ==========================================================================
+   Headings
+   ========================================================================== */
+
+h2 {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px 0;
+}
+
+h3 {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #7a7a7a;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 8px;
+  margin: 0 0 24px 0;
+}
+
+/* ==========================================================================
+   Text
+   ========================================================================== */
+
+p {
+  margin: 0 0 22px 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+ul {
+  margin-top: 16px;
+  margin-bottom: 28px;
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+a {
+  color: #111;
+  text-decoration: underline;
+  text-decoration-color: #d3d3d3;
+  text-underline-offset: 4px;
+}
+
+a:hover {
+  text-decoration-color: #888;
+}
+
+/* ==========================================================================
+   Horizontal rules
+   ========================================================================== */
+
+hr {
+  border: none;
+  border-top: 1px solid #e8e8e8;
+  margin: 72px 0;
+}
+
+/* ==========================================================================
+   Areas of focus
+   ========================================================================== */
+
+.expertise-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px 60px;
+}
+
+.expertise-grid h4 {
+  margin: 0 0 10px 0;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.expertise-grid p {
+  color: #666;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+.footer {
+  color: #777;
+  font-size: 18px;
+  margin-top: 40px;
+}
+
+/* ==========================================================================
+   Print
+   ========================================================================== */
+
+@media print {
+
+  @page {
+    size: A4;
+    margin: 18mm;
+  }
+
+  html,
+  body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-size: 11pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 34pt;
+    margin-bottom: 18pt;
+  }
+
+  .subtitle {
+    font-size: 19pt;
+    margin-bottom: 10pt;
+  }
+
+  .tagline {
+    font-size: 11pt;
+    margin-bottom: 28pt;
+  }
+
+  .section-label {
+    font-size: 13pt;
+    margin-top: 26pt;
+    margin-bottom: 12pt;
+  }
+
+  h2 {
+    font-size: 18pt;
+  }
+
+  h3 {
+    font-size: 12pt;
+  }
+
+  p,
+  li {
+    font-size: 11pt;
+  }
+
+  a {
+    text-decoration: none;
+    color: #111;
+  }
+
+  .expertise-grid {
+    gap: 18pt 32pt;
+  }
+}
